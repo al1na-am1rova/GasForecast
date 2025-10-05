@@ -209,6 +209,77 @@ namespace GasForecast.Controllers
             return Ok(unitTypes);
         }
 
+        //LINQ
+
+        // Данные по конкретному типу агрегата
+        [HttpGet("by-unit-type/{unitType}")]
+        public IActionResult GetByUnitType(string unitType)
+        {
+            var result = _context.ElectricityConsumptionData
+                .Where(data => data.UnitType == unitType)
+                .Select(data => new
+                {
+                    data.Id,
+                    data.Timestamp,
+                    data.GasConsumption,
+                    data.ActiveUnitsCount,
+                    data.OutsideTemperature,
+                    Efficiency = data.GasConsumption / data.OperatingHours
+                })
+                .OrderByDescending(x => x.Timestamp)
+                .ToList();
+
+            return Ok(result);
+        }
+
+        //Анализ эффективности по типам агрегатов с временными интервалами
+        [HttpGet("queries/unit-efficiency-analysis/{unitType}")]
+        public IActionResult GetUnitEfficiencyAnalysis(string unitType, [FromQuery] int days = 30)
+        {
+            var startDate = DateTime.UtcNow.AddDays(-days);
+
+            var result = _context.ElectricityConsumptionData
+                .Where(data => data.UnitType == unitType && data.Timestamp >= startDate)
+                .GroupBy(data => new {
+                    Year = data.Timestamp.Year,
+                    Month = data.Timestamp.Month,
+                    Week = data.Timestamp.Day / 7 // Группировка по неделям
+                })
+                .Select(group => new
+                {
+                    Period = $"{group.Key.Year}-{group.Key.Month:00}-W{group.Key.Week + 1}",
+                    StartDate = group.Min(g => g.Timestamp),
+                    EndDate = group.Max(g => g.Timestamp),
+
+                    // Основные метрики
+                    TotalRecords = group.Count(),
+                    TotalGasConsumption = group.Sum(g => g.GasConsumption),
+                    TotalOperatingHours = group.Sum(g => g.OperatingHours),
+
+                    // Эффективность
+                    AvgEfficiency = group.Average(g => g.GasConsumption / g.OperatingHours),
+                    MaxEfficiency = group.Max(g => g.GasConsumption / g.OperatingHours),
+                    MinEfficiency = group.Min(g => g.GasConsumption / g.OperatingHours),
+
+                    // Температурный анализ
+                    AvgTemperature = group.Average(g => g.OutsideTemperature),
+                    MinTemperature = group.Min(g => g.OutsideTemperature),
+                    MaxTemperature = group.Max(g => g.OutsideTemperature),
+
+                    // Анализ мощности
+                    AvgPowerPercentage = group.Average(g => g.UnitPowerPercentage),
+                    PowerUtilization = group.Average(g => g.UnitPowerPercentage) / 100,
+
+                    // Статистика по наработке
+                    AvgOperatingHours = group.Average(g => g.OperatingHours),
+                    TotalActiveUnits = group.Sum(g => g.ActiveUnitsCount),
+                })
+                .OrderBy(x => x.StartDate)
+                .ToList();
+
+            return Ok(new { UnitType = unitType, AnalysisPeriod = $"{days} дней", Data = result });
+        }
+
         private bool ElectricityConsumptionDataExists(int id)
         {
             return _context.ElectricityConsumptionData.Any(e => e.Id == id);
