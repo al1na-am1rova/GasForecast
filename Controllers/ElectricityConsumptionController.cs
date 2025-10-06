@@ -1,10 +1,11 @@
 ﻿// Controllers/ElectricityConsumptionController.cs
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using GasForecast.Data;
 using GasForecast.Models;
 using GasForecast.Models.DTO;
 using GasForecast.Services;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -111,6 +112,7 @@ namespace GasForecast.Controllers
         // POST: api/electricityconsumption/calculate-and-save - Расчет и сохранение
 
         [HttpPost("create_and_calculate")]
+        [Authorize(Roles = "admin")]
         public async Task<ActionResult<ElectricityConsumptionData>> CalculateAndSave(
             [FromBody] ElectricityCalculationRequest request)
         {
@@ -167,6 +169,7 @@ namespace GasForecast.Controllers
 
         // PUT: api/electricityconsumption/ UPDATE с обязательным пересчетом
         [HttpPut("update_and_calculate_{id}")]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> PutElectricityConsumptionData(int id, ElectricityConsumptionData data)
         {
             if (id != data.Id) return BadRequest();
@@ -211,6 +214,7 @@ namespace GasForecast.Controllers
 
         // DELETE: api/electricityconsumption/DELETE
         [HttpDelete("delete_{id}")]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> DeleteElectricityConsumptionData(int id)
         {
             var data = await _context.ElectricityConsumptionData.FindAsync(id);
@@ -222,6 +226,7 @@ namespace GasForecast.Controllers
 
         // GET: api/electricityconsumption/unit-types - Доступные типы агрегатов
         [HttpGet("get_unit_types")]
+        [Authorize]
         public ActionResult<IEnumerable<string>> GetUnitTypes()
         {
             var unitTypes = new List<string>
@@ -237,6 +242,7 @@ namespace GasForecast.Controllers
 
         // Данные по конкретному типу агрегата
         [HttpGet("get_data_by_unit_type/{unitType}")]
+        [Authorize]
         public IActionResult GetByUnitType(string unitType)
         {
             var result = _context.ElectricityConsumptionData
@@ -257,6 +263,7 @@ namespace GasForecast.Controllers
 
         //Анализ эффективности по типам агрегатов с временными интервалами
         [HttpGet("queries/unit_efficiency_analysis/{unitType}")]
+        [Authorize]
         public IActionResult GetUnitEfficiencyAnalysis(string unitType, [FromQuery] int days = 30)
         {
             var startDate = DateTime.UtcNow.AddDays(-days);
