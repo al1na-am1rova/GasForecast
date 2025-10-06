@@ -1,0 +1,514 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "GasForecast",
+    "version": "1.0"
+  },
+  "paths": {
+    "/api/ElectricityConsumption/read_all": {
+      "get": {
+        "tags": [
+          "ElectricityConsumption"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ElectricityConsumptionData"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ElectricityConsumptionData"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ElectricityConsumptionData"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ElectricityConsumption/read_{id}": {
+      "get": {
+        "tags": [
+          "ElectricityConsumption"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ElectricityConsumptionData"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ElectricityConsumptionData"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ElectricityConsumptionData"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ElectricityConsumption/create": {
+      "post": {
+        "tags": [
+          "ElectricityConsumption"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ElectricityConsumptionData"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ElectricityConsumptionData"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ElectricityConsumptionData"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ElectricityConsumptionData"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ElectricityConsumptionData"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ElectricityConsumptionData"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ElectricityConsumption/calculate": {
+      "post": {
+        "tags": [
+          "ElectricityConsumption"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ElectricityCalculationRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ElectricityCalculationRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ElectricityCalculationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ElectricityCalculationResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ElectricityCalculationResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ElectricityCalculationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ElectricityConsumption/calculate_and_save": {
+      "post": {
+        "tags": [
+          "ElectricityConsumption"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ElectricityCalculationRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ElectricityCalculationRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ElectricityCalculationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ElectricityConsumptionData"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ElectricityConsumptionData"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ElectricityConsumptionData"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ElectricityConsumption/update_{id}": {
+      "put": {
+        "tags": [
+          "ElectricityConsumption"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ElectricityConsumptionData"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ElectricityConsumptionData"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ElectricityConsumptionData"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/ElectricityConsumption/delete_{id}": {
+      "delete": {
+        "tags": [
+          "ElectricityConsumption"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/ElectricityConsumption/get_unit_types": {
+      "get": {
+        "tags": [
+          "ElectricityConsumption"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ElectricityConsumption/get_data_by_unit_type/{unitType}": {
+      "get": {
+        "tags": [
+          "ElectricityConsumption"
+        ],
+        "parameters": [
+          {
+            "name": "unitType",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/ElectricityConsumption/queries/unit_efficiency_analysis/{unitType}": {
+      "get": {
+        "tags": [
+          "ElectricityConsumption"
+        ],
+        "parameters": [
+          {
+            "name": "unitType",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "days",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 30
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ElectricityCalculationRequest": {
+        "required": [
+          "activeUnitsCount",
+          "lowerHeatingValue",
+          "operatingHours",
+          "outsideTemperature",
+          "totalOperatingHours",
+          "unitPowerPercentage",
+          "unitType"
+        ],
+        "type": "object",
+        "properties": {
+          "unitType": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "activeUnitsCount": {
+            "maximum": 100,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          },
+          "outsideTemperature": {
+            "maximum": 50,
+            "minimum": -50,
+            "type": "number",
+            "format": "double"
+          },
+          "operatingHours": {
+            "maximum": 10000,
+            "minimum": 0,
+            "type": "number",
+            "format": "double"
+          },
+          "totalOperatingHours": {
+            "maximum": 100000,
+            "minimum": 0,
+            "type": "number",
+            "format": "double"
+          },
+          "unitPowerPercentage": {
+            "maximum": 100,
+            "minimum": 0,
+            "type": "number",
+            "format": "double"
+          },
+          "lowerHeatingValue": {
+            "maximum": 10000,
+            "minimum": 7000,
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ElectricityCalculationResponse": {
+        "type": "object",
+        "properties": {
+          "gasConsumption": {
+            "type": "number",
+            "format": "double"
+          },
+          "unit": {
+            "type": "string",
+            "nullable": true
+          },
+          "calculationTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "calculationId": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ElectricityConsumptionData": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "gasConsumption": {
+            "type": "number",
+            "format": "double"
+          },
+          "unitType": {
+            "type": "string",
+            "nullable": true
+          },
+          "activeUnitsCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "outsideTemperature": {
+            "type": "number",
+            "format": "double"
+          },
+          "operatingHours": {
+            "type": "number",
+            "format": "double"
+          },
+          "totalOperatingHours": {
+            "type": "number",
+            "format": "double"
+          },
+          "unitPowerPercentage": {
+            "type": "number",
+            "format": "double"
+          },
+          "lowerHeatingValue": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  }
+}

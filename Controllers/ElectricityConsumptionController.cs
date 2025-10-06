@@ -27,7 +27,7 @@ namespace GasForecast.Controllers
         }
 
         // GET: api/electricityconsumption - READ ALL
-        [HttpGet]
+        [HttpGet ("read_all")]
         public async Task<ActionResult<IEnumerable<ElectricityConsumptionData>>> GetElectricityConsumptionData()
         {
             return await _context.ElectricityConsumptionData
@@ -35,8 +35,8 @@ namespace GasForecast.Controllers
                 .ToListAsync();
         }
 
-        // GET: api/electricityconsumption/5 - READ BY ID
-        [HttpGet("{id}")]
+        // GET: api/electricityconsumption/ READ BY ID
+        [HttpGet("read_{id}")]
         public async Task<ActionResult<ElectricityConsumptionData>> GetElectricityConsumptionData(int id)
         {
             var data = await _context.ElectricityConsumptionData.FindAsync(id);
@@ -44,72 +44,73 @@ namespace GasForecast.Controllers
             return data;
         }
 
-        // POST: api/electricityconsumption - CREATE (без расчета)
-        [HttpPost]
-        public async Task<ActionResult<ElectricityConsumptionData>> PostElectricityConsumptionData(
-            ElectricityConsumptionData data)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+        //// POST: api/electricityconsumption - CREATE (без расчета)
+        //[HttpPost("create")]
+        //public async Task<ActionResult<ElectricityConsumptionData>> PostElectricityConsumptionData(
+        //    ElectricityConsumptionData data)
+        //{
+        //    if (!ModelState.IsValid)
+        //    {
+        //        return BadRequest(ModelState);
+        //    }
 
-            data.Timestamp = DateTime.UtcNow;
-            _context.ElectricityConsumptionData.Add(data);
-            await _context.SaveChangesAsync();
+        //    data.Timestamp = DateTime.UtcNow;
+        //    _context.ElectricityConsumptionData.Add(data);
+        //    await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetElectricityConsumptionData),
-                new { id = data.Id }, data);
-        }
+        //    return CreatedAtAction(nameof(GetElectricityConsumptionData),
+        //        new { id = data.Id }, data);
+        //}
 
-        // POST: api/electricityconsumption/calculate - Только расчет
-        [HttpPost("calculate")]
-        public ActionResult<ElectricityCalculationResponse> CalculateGasConsumption(
-            [FromBody] ElectricityCalculationRequest request)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+        //// POST: api/electricityconsumption/calculate - Только расчет
+        //[HttpPost("calculate")]
+        //public ActionResult<ElectricityCalculationResponse> CalculateGasConsumption(
+        //    [FromBody] ElectricityCalculationRequest request)
+        //{
+        //    if (!ModelState.IsValid)
+        //    {
+        //        return BadRequest(ModelState);
+        //    }
 
-            try
-            {
-                // Создаем данные для расчета
-                var calculationData = _calculator.CreateCalculationData(
-                    request.UnitType,
-                    request.ActiveUnitsCount,
-                    request.OutsideTemperature,
-                    request.OperatingHours,
-                    request.TotalOperatingHours,
-                    request.UnitPowerPercentage,
-                    request.LowerHeatingValue
-                );
+        //    try
+        //    {
+        //        // Создаем данные для расчета
+        //        var calculationData = _calculator.CreateCalculationData(
+        //            request.UnitType,
+        //            request.ActiveUnitsCount,
+        //            request.OutsideTemperature,
+        //            request.OperatingHours,
+        //            request.TotalOperatingHours,
+        //            request.UnitPowerPercentage,
+        //            request.LowerHeatingValue
+        //        );
 
-                // Рассчитываем расход газа
-                var gasConsumption = _calculator.CalculateGasConsumption(calculationData);
+        //        // Рассчитываем расход газа
+        //        var gasConsumption = _calculator.CalculateGasConsumption(calculationData);
 
-                var response = new ElectricityCalculationResponse
-                {
-                    GasConsumption = gasConsumption,
-                    Unit = "м³",
-                    CalculationTime = DateTime.UtcNow,
-                    CalculationId = Guid.NewGuid().ToString()
-                };
+        //        var response = new ElectricityCalculationResponse
+        //        {
+        //            GasConsumption = gasConsumption,
+        //            Unit = "м³",
+        //            CalculationTime = DateTime.UtcNow,
+        //            CalculationId = Guid.NewGuid().ToString()
+        //        };
 
-                return Ok(response);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new { error = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { error = "Ошибка расчета" });
-            }
-        }
+        //        return Ok(response);
+        //    }
+        //    catch (ArgumentException ex)
+        //    {
+        //        return BadRequest(new { error = ex.Message });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return StatusCode(500, new { error = "Ошибка расчета" });
+        //    }
+        //}
 
         // POST: api/electricityconsumption/calculate-and-save - Расчет и сохранение
-        [HttpPost("calculate-and-save")]
+
+        [HttpPost("create_and_calculate")]
         public async Task<ActionResult<ElectricityConsumptionData>> CalculateAndSave(
             [FromBody] ElectricityCalculationRequest request)
         {
@@ -164,29 +165,52 @@ namespace GasForecast.Controllers
             }
         }
 
-        // PUT: api/electricityconsumption/5 - UPDATE (без пересчета)
-        [HttpPut("{id}")]
+        // PUT: api/electricityconsumption/ UPDATE с обязательным пересчетом
+        [HttpPut("update_and_calculate_{id}")]
         public async Task<IActionResult> PutElectricityConsumptionData(int id, ElectricityConsumptionData data)
         {
             if (id != data.Id) return BadRequest();
 
-            data.Timestamp = DateTime.UtcNow;
-            _context.Entry(data).State = EntityState.Modified;
-
             try
             {
+                // Всегда пересчитываем расход газа при обновлении
+                var calculationData = _calculator.CreateCalculationData(
+                    data.UnitType,
+                    data.ActiveUnitsCount,
+                    data.OutsideTemperature,
+                    data.OperatingHours,
+                    data.TotalOperatingHours,
+                    data.UnitPowerPercentage,
+                    data.LowerHeatingValue
+                );
+
+                // Рассчитываем новый расход газа
+                var newGasConsumption = _calculator.CalculateGasConsumption(calculationData);
+                data.GasConsumption = newGasConsumption;
+                data.Timestamp = DateTime.UtcNow;
+
+                _context.Entry(data).State = EntityState.Modified;
                 await _context.SaveChangesAsync();
+
+                return Ok(new
+                {
+                    Message = "Данные успешно обновлены с пересчетом расхода газа",
+                    NewGasConsumption = data.GasConsumption
+                });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { error = ex.Message });
             }
             catch (DbUpdateConcurrencyException)
             {
                 if (!ElectricityConsumptionDataExists(id)) return NotFound();
                 else throw;
             }
-            return NoContent();
         }
 
-        // DELETE: api/electricityconsumption/5 - DELETE
-        [HttpDelete("{id}")]
+        // DELETE: api/electricityconsumption/DELETE
+        [HttpDelete("delete_{id}")]
         public async Task<IActionResult> DeleteElectricityConsumptionData(int id)
         {
             var data = await _context.ElectricityConsumptionData.FindAsync(id);
@@ -197,7 +221,7 @@ namespace GasForecast.Controllers
         }
 
         // GET: api/electricityconsumption/unit-types - Доступные типы агрегатов
-        [HttpGet("unit-types")]
+        [HttpGet("get_unit_types")]
         public ActionResult<IEnumerable<string>> GetUnitTypes()
         {
             var unitTypes = new List<string>
@@ -212,7 +236,7 @@ namespace GasForecast.Controllers
         //LINQ
 
         // Данные по конкретному типу агрегата
-        [HttpGet("by-unit-type/{unitType}")]
+        [HttpGet("get_data_by_unit_type/{unitType}")]
         public IActionResult GetByUnitType(string unitType)
         {
             var result = _context.ElectricityConsumptionData
@@ -223,8 +247,7 @@ namespace GasForecast.Controllers
                     data.Timestamp,
                     data.GasConsumption,
                     data.ActiveUnitsCount,
-                    data.OutsideTemperature,
-                    Efficiency = data.GasConsumption / data.OperatingHours
+                    data.OutsideTemperature
                 })
                 .OrderByDescending(x => x.Timestamp)
                 .ToList();
@@ -233,7 +256,7 @@ namespace GasForecast.Controllers
         }
 
         //Анализ эффективности по типам агрегатов с временными интервалами
-        [HttpGet("queries/unit-efficiency-analysis/{unitType}")]
+        [HttpGet("queries/unit_efficiency_analysis/{unitType}")]
         public IActionResult GetUnitEfficiencyAnalysis(string unitType, [FromQuery] int days = 30)
         {
             var startDate = DateTime.UtcNow.AddDays(-days);
@@ -268,7 +291,6 @@ namespace GasForecast.Controllers
 
                     // Анализ мощности
                     AvgPowerPercentage = group.Average(g => g.UnitPowerPercentage),
-                    PowerUtilization = group.Average(g => g.UnitPowerPercentage) / 100,
 
                     // Статистика по наработке
                     AvgOperatingHours = group.Average(g => g.OperatingHours),

@@ -20,24 +20,24 @@ namespace GasForecast.Data
                     .IsRequired()
                     .HasMaxLength(100);
 
-                // Для PostgreSQL используем numeric
+                // Для SQLite используем REAL вместо numeric
                 entity.Property(e => e.GasConsumption)
-                    .HasColumnType("numeric(18,3)");
+                    .HasColumnType("REAL"); // REAL для чисел с плавающей точкой
 
                 entity.Property(e => e.OutsideTemperature)
-                    .HasColumnType("numeric(5,2)");
+                    .HasColumnType("REAL");
 
                 entity.Property(e => e.OperatingHours)
-                    .HasColumnType("numeric(10,2)");
+                    .HasColumnType("REAL");
 
                 entity.Property(e => e.TotalOperatingHours)
-                    .HasColumnType("numeric(10,2)");
+                    .HasColumnType("REAL");
 
                 entity.Property(e => e.UnitPowerPercentage)
-                    .HasColumnType("numeric(5,2)");
+                    .HasColumnType("REAL");
 
                 entity.Property(e => e.LowerHeatingValue)
-                    .HasColumnType("numeric(8,2)");
+                    .HasColumnType("REAL");
 
                 entity.Property(e => e.Timestamp)
                     .IsRequired();
@@ -48,7 +48,7 @@ namespace GasForecast.Data
                 entity.HasIndex(e => e.OutsideTemperature);
             });
 
-            // Начальные данные для тестирования - исправлены типы
+            // Начальные данные для тестирования
             modelBuilder.Entity<ElectricityConsumptionData>().HasData(
                 new ElectricityConsumptionData
                 {
@@ -56,12 +56,12 @@ namespace GasForecast.Data
                     Timestamp = DateTime.UtcNow.AddDays(-10),
                     UnitType = "ГТЭС-12",
                     ActiveUnitsCount = 2,
-                    OutsideTemperature = -15.5, // double
-                    OperatingHours = 720.0, // double
-                    TotalOperatingHours = 15000.0, // double
-                    UnitPowerPercentage = 85.0, // double
-                    LowerHeatingValue = 8500.0, // double
-                    GasConsumption = 2456.324 // double
+                    OutsideTemperature = -15.5,
+                    OperatingHours = 720.0,
+                    TotalOperatingHours = 15000.0,
+                    UnitPowerPercentage = 85.0,
+                    LowerHeatingValue = 8500.0,
+                    GasConsumption = 2456.324
                 },
                 new ElectricityConsumptionData
                 {
@@ -69,12 +69,12 @@ namespace GasForecast.Data
                     Timestamp = DateTime.UtcNow.AddDays(-5),
                     UnitType = "ЭГ-6000",
                     ActiveUnitsCount = 1,
-                    OutsideTemperature = 5.2, // double
-                    OperatingHours = 480.0, // double
-                    TotalOperatingHours = 12000.0, // double
-                    UnitPowerPercentage = 75.0, // double
-                    LowerHeatingValue = 8300.0, // double
-                    GasConsumption = 1567.891 // double
+                    OutsideTemperature = 5.2,
+                    OperatingHours = 480.0,
+                    TotalOperatingHours = 12000.0,
+                    UnitPowerPercentage = 75.0,
+                    LowerHeatingValue = 8300.0,
+                    GasConsumption = 1567.891
                 },
                 new ElectricityConsumptionData
                 {
@@ -82,12 +82,12 @@ namespace GasForecast.Data
                     Timestamp = DateTime.UtcNow.AddDays(-1),
                     UnitType = "АСГД-500",
                     ActiveUnitsCount = 3,
-                    OutsideTemperature = -20.1, // double
-                    OperatingHours = 600.0, // double
-                    TotalOperatingHours = 8000.0, // double
-                    UnitPowerPercentage = 90.0, // double
-                    LowerHeatingValue = 8600.0, // double
-                    GasConsumption = 1234.567 // double
+                    OutsideTemperature = -20.1,
+                    OperatingHours = 600.0,
+                    TotalOperatingHours = 8000.0,
+                    UnitPowerPercentage = 90.0,
+                    LowerHeatingValue = 8600.0,
+                    GasConsumption = 1234.567
                 },
                 new ElectricityConsumptionData
                 {
@@ -95,12 +95,12 @@ namespace GasForecast.Data
                     Timestamp = DateTime.UtcNow.AddHours(-12),
                     UnitType = "ГТЭС-12",
                     ActiveUnitsCount = 1,
-                    OutsideTemperature = 10.5, // double
-                    OperatingHours = 240.0, // double
-                    TotalOperatingHours = 20000.0, // double
-                    UnitPowerPercentage = 70.0, // double
-                    LowerHeatingValue = 8400.0, // double
-                    GasConsumption = 987.654 // double
+                    OutsideTemperature = 10.5,
+                    OperatingHours = 240.0,
+                    TotalOperatingHours = 20000.0,
+                    UnitPowerPercentage = 70.0,
+                    LowerHeatingValue = 8400.0,
+                    GasConsumption = 987.654
                 },
                 new ElectricityConsumptionData
                 {
@@ -108,12 +108,12 @@ namespace GasForecast.Data
                     Timestamp = DateTime.UtcNow.AddHours(-6),
                     UnitType = "ЭГ-6000",
                     ActiveUnitsCount = 2,
-                    OutsideTemperature = 15.3, // double
-                    OperatingHours = 360.0, // double
-                    TotalOperatingHours = 9000.0, // double
-                    UnitPowerPercentage = 95.0, // double
-                    LowerHeatingValue = 8550.0, // double
-                    GasConsumption = 2100.123 // double
+                    OutsideTemperature = 15.3,
+                    OperatingHours = 360.0,
+                    TotalOperatingHours = 9000.0,
+                    UnitPowerPercentage = 95.0,
+                    LowerHeatingValue = 8550.0,
+                    GasConsumption = 2100.123
                 }
             );
         }
