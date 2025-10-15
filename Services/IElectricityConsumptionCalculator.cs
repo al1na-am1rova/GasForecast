@@ -7,51 +7,42 @@ namespace GasForecast.Services
 {
     public interface IElectricityConsumptionCalculator
     {
-        double CalculateGasConsumption(ElectricityConsumptionData data);
-        ElectricityConsumptionData CreateCalculationData(
-            string unitType,
-            int activeUnitsCount,
-            double outsideTemperature,
-            double operatingHours,
-            double totalOperatingHours,
-            double unitPowerPercentage,
-            double lowerHeatingValue);
+
     }
 
     public class ElectricityConsumptionCalculator : IElectricityConsumptionCalculator
     {
-        private readonly ElectricityConsumptionNorms _normsService;
-        public ElectricityConsumptionCalculator(ElectricityConsumptionNorms normsService)
+        private readonly ElectricityCoefficientsService _coefficientService;
+        public ElectricityConsumptionCalculator(ElectricityCoefficientsService coefficientService)
         {
-            _normsService = normsService;
+            _coefficientService = coefficientService;
         }
 
-        public double CalculateGasConsumption(ElectricityConsumptionData data)
+        public double CalculateGasConsumption(int StandartPower,double GasConsumptionNorm, double OutsideTemperature, double TotalOperatingHours,
+            double OperatingHours, int CurrentPowerPercentage, string UnitType, int ActiveUnitsCount, double LowerHeatingValue)
         {
             // Получаем нормы из сервиса
-            var availablePower = _normsService.GetAvailablePowerNorms(data.UnitType);
-            var gasConsumptionNorm = _normsService.GetGasConsumptionNorm(data.UnitType);
-            var atmosphericCoefficient = _normsService.GetAtmosphericCoefficients(data.OutsideTemperature);
-            var operatingHoursCoefficient = _normsService.GetOperatingHoursRanges(data.TotalOperatingHours);
-            var powerCoefficient = _normsService.GetPowerCoefficient(data.UnitType, data.UnitPowerPercentage);
+            var AtmosphericCoefficient = _coefficientService.GetTemperatureCoefficient(OutsideTemperature);
+            var OperatingHoursCoefficient = _coefficientService.GetOperatingTimeCoefficient(TotalOperatingHours);
+            var PowerCoefficient = _coefficientService.GetPowerCoefficient(UnitType, CurrentPowerPercentage);
 
             // Проверяем, что все необходимые данные есть
-            if (availablePower == null || gasConsumptionNorm == null ||
-                atmosphericCoefficient == null || operatingHoursCoefficient == null)
+            if (StandartPower == null || GasConsumptionNorm == null ||
+                AtmosphericCoefficient == null || OperatingHoursCoefficient == null)
             {
                 throw new ArgumentException("Не удалось получить нормативные данные для расчета");
             }
 
             // Основная формула расчета расхода газа
             double gasConsumption = CalculateGasConsumptionFormula(
-                data.OperatingHours,
-                availablePower.Value,
-                gasConsumptionNorm.Value,
-                atmosphericCoefficient.Value,
-                operatingHoursCoefficient.Value,
-                powerCoefficient,
-                data.ActiveUnitsCount,
-                data.LowerHeatingValue
+                OperatingHours,
+                StandartPower,
+                GasConsumptionNorm,
+                AtmosphericCoefficient,
+                OperatingHoursCoefficient,
+                PowerCoefficient,
+                ActiveUnitsCount,
+                LowerHeatingValue
             );
 
             return gasConsumption;
@@ -59,41 +50,41 @@ namespace GasForecast.Services
 
         private double CalculateGasConsumptionFormula(
             double OperatingHours,
-            double availablePower,
-            double gasConsumptionNorm,
-            double atmosphericCoefficient,
-            double operatingHoursCoefficient,
-            double powerCoefficient,
-            int activeUnitsCount,
-            double lowerHeatingValue)
+            int standartPower,
+            double GasConsumptionNorm,
+            double AtmosphericCoefficient,
+            double OperatingHoursCoefficient,
+            double PowerCoefficient,
+            int ActiveUnitsCount,
+            double LowerHeatingValue)
         {
-            double correctionK = 1.1 * atmosphericCoefficient * operatingHoursCoefficient * powerCoefficient;
-            double calorieK = lowerHeatingValue / 7000;
-            double finalConsumption = availablePower * gasConsumptionNorm * correctionK * activeUnitsCount * OperatingHours * 0.001 / calorieK;
+            double correctionK = 1.1 * AtmosphericCoefficient * OperatingHoursCoefficient * PowerCoefficient;
+            double calorieK = LowerHeatingValue / 7000;
+            double finalConsumption = standartPower * GasConsumptionNorm * correctionK * ActiveUnitsCount * OperatingHours * 0.001 / calorieK;
 
             return Math.Round(finalConsumption, 3);
         }
 
-        public ElectricityConsumptionData CreateCalculationData(
-            string unitType,
-            int activeUnitsCount,
-            double outsideTemperature,
-            double operatingHours,
-            double totalOperatingHours,
-            double unitPowerPercentage,
-            double lowerHeatingValue)
-        {
-            return new ElectricityConsumptionData
-            {
-                UnitType = unitType,
-                ActiveUnitsCount = activeUnitsCount,
-                OutsideTemperature = outsideTemperature,
-                OperatingHours = operatingHours,
-                TotalOperatingHours = totalOperatingHours,
-                UnitPowerPercentage = Math.Clamp(unitPowerPercentage, 0, 100),
-                LowerHeatingValue = lowerHeatingValue,
-                Timestamp = DateTime.Now
-            };
-        }
+        //public ElectricityConsumptionData CreateCalculationData(
+        //    string unitType,
+        //    int activeUnitsCount,
+        //    double outsideTemperature,
+        //    double operatingHours,
+        //    double totalOperatingHours,
+        //    double unitPowerPercentage,
+        //    double lowerHeatingValue)
+        //{
+        //    return new ElectricityConsumptionData
+        //    {
+        //        UnitType = unitType,
+        //        ActiveUnitsCount = activeUnitsCount,
+        //        OutsideTemperature = outsideTemperature,
+        //        OperatingHours = operatingHours,
+        //        TotalOperatingHours = totalOperatingHours,
+        //        UnitPowerPercentage = Math.Clamp(unitPowerPercentage, 0, 100),
+        //        LowerHeatingValue = lowerHeatingValue,
+        //        Timestamp = DateTime.Now
+        //    };
+        //}
     }
 }

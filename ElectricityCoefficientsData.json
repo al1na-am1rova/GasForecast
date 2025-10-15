@@ -1,0 +1,133 @@
+{
+  "temperatureCoefficient": {
+    "title": "Температура наружного воздуха, °С",
+    "coefficientName": "K_a",
+    "data": [
+      {
+        "temperature": 40,
+        "coefficient": 1.063
+      },
+      {
+        "temperature": 30,
+        "coefficient": 1.052
+      },
+      {
+        "temperature": 25,
+        "coefficient": 1.047
+      },
+      {
+        "temperature": 20,
+        "coefficient": 1.042
+      },
+      {
+        "temperature": 15,
+        "coefficient": 1.037
+      },
+      {
+        "temperature": 10,
+        "coefficient": 1.032
+      },
+      {
+        "temperature": 5,
+        "coefficient": 1.027
+      },
+      {
+        "temperature": 0,
+        "coefficient": 1.022
+      },
+      {
+        "temperature": -5,
+        "coefficient": 1.017
+      },
+      {
+        "temperature": -10,
+        "coefficient": 1.012
+      },
+      {
+        "temperature": -15,
+        "coefficient": 1.007
+      },
+      {
+        "temperature": -20,
+        "coefficient": 1.002
+      },
+      {
+        "temperature": -25,
+        "coefficient": 0.997
+      },
+      {
+        "temperature": -30,
+        "coefficient": 0.992
+      }
+    ]
+  },
+  "operatingTimeCoefficient": {
+    "title": "Значение коэффициента K_H, учитывающего наработку агрегата с начала эксплуатации",
+    "coefficientName": "K_H",
+    "data": [
+      {
+        "operatingHours": "до 15 тыс. ч",
+        "coefficient": 1.0
+      },
+      {
+        "operatingHours": "от 15 до 30 тыс. ч",
+        "coefficient": 1.02
+      },
+      {
+        "operatingHours": "свыше 30 тыс. ч",
+        "coefficient": 1.05
+      }
+    ]
+  },
+  "powerCoefficient": {
+    "title": "Мощность агрегата, %",
+    "coefficientName": "K_M",
+    "data": [
+      {
+        "powerRange": "20-29",
+        "piston": 2.50,
+        "gasTurbine": 2.30
+      },
+      {
+        "powerRange": "30-39",
+        "piston": 1.87,
+        "gasTurbine": 1.70
+      },
+      {
+        "powerRange": "40-49",
+        "piston": 1.50,
+        "gasTurbine": 1.45
+      },
+      {
+        "powerRange": "50-59",
+        "piston": 1.33,
+        "gasTurbine": 1.28
+      },
+      {
+        "powerRange": "60-69",
+        "piston": 1.20,
+        "gasTurbine": 1.18
+      },
+      {
+        "powerRange": "70-79",
+        "piston": 1.12,
+        "gasTurbine": 1.10
+      },
+      {
+        "powerRange": "80-89",
+        "piston": 1.08,
+        "gasTurbine": 1.06
+      },
+      {
+        "powerRange": "90-99",
+        "piston": 1.03,
+        "gasTurbine": 1.03
+      },
+      {
+        "powerRange": "100",
+        "piston": 1.00,
+        "gasTurbine": 1.00
+      }
+    ]
+  }
+}

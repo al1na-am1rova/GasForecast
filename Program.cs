@@ -31,7 +31,9 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddOpenApi();
 
 builder.Services.AddScoped<IElectricityConsumptionCalculator, ElectricityConsumptionCalculator>();
-builder.Services.AddSingleton<ElectricityConsumptionNorms>();
+
+// В Program.cs
+builder.Services.AddSingleton<ElectricityCoefficientsService, ElectricityCoefficientsService>();
 
 // Регистрируем DbContext для PostgreSQL
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
