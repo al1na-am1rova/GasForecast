@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GasForecast.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251015073329_InitialCreate")]
+    [Migration("20251016094621_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -28,6 +28,9 @@ namespace GasForecast.Migrations
 
                     b.Property<int>("ActiveUnitsCount")
                         .HasColumnType("INTEGER");
+
+                    b.Property<int>("CurrentPowerPercentage")
+                        .HasColumnType("decimal(3,0)");
 
                     b.Property<double>("GasConsumption")
                         .HasColumnType("decimal(18,2)");
@@ -48,28 +51,6 @@ namespace GasForecast.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("ElectricalPowerStations");
-                });
-
-            modelBuilder.Entity("GasForecast.Models.ElectricalUnit", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("CurrentPowerPercentage")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("UnitType")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UnitType")
-                        .IsUnique();
-
-                    b.ToTable("ElectricalUnits");
                 });
 
             modelBuilder.Entity("GasForecast.Models.ElectricalUnitPassport", b =>
@@ -100,23 +81,6 @@ namespace GasForecast.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("ElectricalUnitPassports");
-                });
-
-            modelBuilder.Entity("GasForecast.Models.ElectricalUnit", b =>
-                {
-                    b.HasOne("GasForecast.Models.ElectricalPowerStation", null)
-                        .WithMany()
-                        .HasForeignKey("UnitType")
-                        .HasPrincipalKey("UnitType")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("GasForecast.Models.ElectricalUnitPassport", null)
-                        .WithOne()
-                        .HasForeignKey("GasForecast.Models.ElectricalUnit", "UnitType")
-                        .HasPrincipalKey("GasForecast.Models.ElectricalUnitPassport", "UnitType")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

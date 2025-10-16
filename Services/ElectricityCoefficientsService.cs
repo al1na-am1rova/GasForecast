@@ -17,15 +17,19 @@ namespace GasForecast.Services
 
         public double GetTemperatureCoefficient(double temperature)
         {
+            System.Diagnostics.Debug.WriteLine("a");
+
             // Ищем точное соответствие температуры
-            var exactMatch = _coefficients.temperatureCoefficient.Data
+            var exactMatch = _coefficients.TemperatureCoefficient.Data
                 .FirstOrDefault(x => x.Temperature == temperature);
 
             if (exactMatch != null)
+            {
                 return exactMatch.Coefficient;
+            }
 
             // Если точного соответствия нет, берем ближайшее значение
-            var sortedData = _coefficients.temperatureCoefficient.Data
+            var sortedData = _coefficients.TemperatureCoefficient.Data
                 .OrderBy(x => x.Temperature)
                 .ToList();
 
@@ -51,11 +55,11 @@ namespace GasForecast.Services
             double operatingHoursInThousands = operatingHours / 1000;
 
             if (operatingHoursInThousands <= 15)
-                return _coefficients.operatingTimeCoefficient.Data[0].Coefficient;
+                return _coefficients.OperatingTimeCoefficient.Data[0].Coefficient;
             else if (operatingHoursInThousands <= 30)
-                return _coefficients.operatingTimeCoefficient.Data[1].Coefficient;
+                return _coefficients.OperatingTimeCoefficient.Data[1].Coefficient;
             else
-                return _coefficients.operatingTimeCoefficient.Data[2].Coefficient;
+                return _coefficients.OperatingTimeCoefficient.Data[2].Coefficient;
         }
 
         public double GetPowerCoefficient(string engineType, double powerPercentage)
@@ -63,7 +67,7 @@ namespace GasForecast.Services
             // Определяем диапазон мощности
             string powerRange = GetPowerRange(powerPercentage);
 
-            var powerData = _coefficients.powerCoefficient.Data
+            var powerData = _coefficients.PowerCoefficient.Data
                 .FirstOrDefault(x => x.PowerRange == powerRange);
 
             if (powerData == null)

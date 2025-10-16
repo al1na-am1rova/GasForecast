@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace GasForecast.Models.DTO
 {
-    public class CreateStationRequest
+    public class PowerStationRequestDTO
     {
         [Required(ErrorMessage = "Название ЭСН обязательно")]
         [StringLength(200, ErrorMessage = "Название не должно превышать 200 символов")]
@@ -14,7 +14,7 @@ namespace GasForecast.Models.DTO
         public string UnitType { get; set; }
 
         [Required(ErrorMessage = "Количество агрегатов обязательно")]
-        [Range(1, 100, ErrorMessage = "Количество агрегатов должно быть от 1 до 100")]
+        [Range(1, 30, ErrorMessage = "Количество агрегатов должно быть от 1 до 30")]
         public int ActiveUnitsCount { get; set; }
 
         [Required(ErrorMessage = "Дата запуска обязательна")]

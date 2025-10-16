@@ -5,10 +5,10 @@
     "version": "1.0"
   },
   "paths": {
-    "/api/ElectricityConsumption/read_all": {
+    "/api/ElectricalUnitPassport/read_all_unit_passports": {
       "get": {
         "tags": [
-          "ElectricityConsumption"
+          "ElectricalUnitPassport"
         ],
         "responses": {
           "200": {
@@ -18,7 +18,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/ElectricityConsumptionData"
+                    "$ref": "#/components/schemas/ElectricalUnitPassport"
                   }
                 }
               },
@@ -26,7 +26,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/ElectricityConsumptionData"
+                    "$ref": "#/components/schemas/ElectricalUnitPassport"
                   }
                 }
               },
@@ -34,7 +34,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/ElectricityConsumptionData"
+                    "$ref": "#/components/schemas/ElectricalUnitPassport"
                   }
                 }
               }
@@ -43,10 +43,10 @@
         }
       }
     },
-    "/api/ElectricityConsumption/read_{id}": {
+    "/api/ElectricalUnitPassport/get_passport_by_id{id}": {
       "get": {
         "tags": [
-          "ElectricityConsumption"
+          "ElectricalUnitPassport"
         ],
         "parameters": [
           {
@@ -65,17 +65,17 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/ElectricityConsumptionData"
+                  "$ref": "#/components/schemas/ElectricalUnitPassport"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ElectricityConsumptionData"
+                  "$ref": "#/components/schemas/ElectricalUnitPassport"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ElectricityConsumptionData"
+                  "$ref": "#/components/schemas/ElectricalUnitPassport"
                 }
               }
             }
@@ -83,26 +83,26 @@
         }
       }
     },
-    "/api/ElectricityConsumption/create": {
+    "/api/ElectricalUnitPassport/create_unit_passport": {
       "post": {
         "tags": [
-          "ElectricityConsumption"
+          "ElectricalUnitPassport"
         ],
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ElectricityConsumptionData"
+                "$ref": "#/components/schemas/UnitPassportRequestDto"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/ElectricityConsumptionData"
+                "$ref": "#/components/schemas/UnitPassportRequestDto"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/ElectricityConsumptionData"
+                "$ref": "#/components/schemas/UnitPassportRequestDto"
               }
             }
           }
@@ -113,17 +113,17 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/ElectricityConsumptionData"
+                  "$ref": "#/components/schemas/UnitPassportResponseDto"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ElectricityConsumptionData"
+                  "$ref": "#/components/schemas/UnitPassportResponseDto"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ElectricityConsumptionData"
+                  "$ref": "#/components/schemas/UnitPassportResponseDto"
                 }
               }
             }
@@ -131,106 +131,10 @@
         }
       }
     },
-    "/api/ElectricityConsumption/calculate": {
-      "post": {
-        "tags": [
-          "ElectricityConsumption"
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ElectricityCalculationRequest"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ElectricityCalculationRequest"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/ElectricityCalculationRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "$ref": "#/components/schemas/ElectricityCalculationResponse"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ElectricityCalculationResponse"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ElectricityCalculationResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/ElectricityConsumption/calculate_and_save": {
-      "post": {
-        "tags": [
-          "ElectricityConsumption"
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ElectricityCalculationRequest"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ElectricityCalculationRequest"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/ElectricityCalculationRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "$ref": "#/components/schemas/ElectricityConsumptionData"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ElectricityConsumptionData"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ElectricityConsumptionData"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/ElectricityConsumption/update_{id}": {
+    "/api/ElectricalUnitPassport/update_unit_passport{id}": {
       "put": {
         "tags": [
-          "ElectricityConsumption"
+          "ElectricalUnitPassport"
         ],
         "parameters": [
           {
@@ -247,17 +151,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ElectricityConsumptionData"
+                "$ref": "#/components/schemas/UnitPassportRequestDto"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/ElectricityConsumptionData"
+                "$ref": "#/components/schemas/UnitPassportRequestDto"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/ElectricityConsumptionData"
+                "$ref": "#/components/schemas/UnitPassportRequestDto"
               }
             }
           }
@@ -269,10 +173,10 @@
         }
       }
     },
-    "/api/ElectricityConsumption/delete_{id}": {
+    "/api/ElectricalUnitPassport/delete_unit_passport_by_id{id}": {
       "delete": {
         "tags": [
-          "ElectricityConsumption"
+          "ElectricalUnitPassport"
         ],
         "parameters": [
           {
@@ -292,10 +196,67 @@
         }
       }
     },
-    "/api/ElectricityConsumption/get_unit_types": {
+    "/api/ElectricityConsumptionCalculation/calculate_electricity_gas_consumption": {
       "get": {
         "tags": [
-          "ElectricityConsumption"
+          "ElectricityConsumptionCalculation"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ElectricityCalculationRequestDTO"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ElectricityCalculationRequestDTO"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ElectricityCalculationRequestDTO"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ElectricityCalculationResponseDTO"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ElectricityCalculationResponseDTO"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ElectricityCalculationResponseDTO"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ElectricityPowerStation/read_all_stations": {
+      "get": {
+        "tags": [
+          "ElectricityPowerStation"
         ],
         "responses": {
           "200": {
@@ -305,7 +266,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "type": "string"
+                    "$ref": "#/components/schemas/ElectricalPowerStation"
                   }
                 }
               },
@@ -313,7 +274,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "type": "string"
+                    "$ref": "#/components/schemas/ElectricalPowerStation"
                   }
                 }
               },
@@ -321,7 +282,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "type": "string"
+                    "$ref": "#/components/schemas/ElectricalPowerStation"
                   }
                 }
               }
@@ -330,18 +291,107 @@
         }
       }
     },
-    "/api/ElectricityConsumption/get_data_by_unit_type/{unitType}": {
+    "/api/ElectricityPowerStation/add_electrical_station": {
+      "post": {
+        "tags": [
+          "ElectricityPowerStation"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PowerStationRequestDTO"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PowerStationRequestDTO"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/PowerStationRequestDTO"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ElectricalPowerStation"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ElectricalPowerStation"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ElectricalPowerStation"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ElectricityPowerStation/get_station_by_id/{id}": {
       "get": {
         "tags": [
-          "ElectricityConsumption"
+          "ElectricityPowerStation"
         ],
         "parameters": [
           {
-            "name": "unitType",
+            "name": "id",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ElectricalPowerStation"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ElectricalPowerStation"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ElectricalPowerStation"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ElectricityPowerStation/delete_station/{id}": {
+      "delete": {
+        "tags": [
+          "ElectricityPowerStation"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
             }
           }
         ],
@@ -352,30 +402,80 @@
         }
       }
     },
-    "/api/ElectricityConsumption/queries/unit_efficiency_analysis/{unitType}": {
-      "get": {
+    "/api/ElectricityPowerStation/update_electrical_station/{id}": {
+      "put": {
         "tags": [
-          "ElectricityConsumption"
+          "ElectricityPowerStation"
         ],
         "parameters": [
           {
-            "name": "unitType",
+            "name": "id",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "days",
-            "in": "query",
-            "schema": {
               "type": "integer",
-              "format": "int32",
-              "default": 30
+              "format": "int32"
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PowerStationRequestDTO"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PowerStationRequestDTO"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/PowerStationRequestDTO"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ElectricalPowerStation"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ElectricalPowerStation"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ElectricalPowerStation"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/login": {
+      "post": {
+        "tags": [
+          "GasForecast"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Person"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "200": {
             "description": "OK"
@@ -386,25 +486,77 @@
   },
   "components": {
     "schemas": {
-      "ElectricityCalculationRequest": {
+      "ElectricalPowerStation": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "activeUnitsCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "unitType": {
+            "type": "string",
+            "nullable": true
+          },
+          "launchDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "gasConsumption": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ElectricalUnitPassport": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "unitType": {
+            "type": "string",
+            "nullable": true
+          },
+          "engineType": {
+            "type": "string",
+            "nullable": true
+          },
+          "ratedPower": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "standartPower": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "consumptionNorm": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ElectricityCalculationRequestDTO": {
         "required": [
-          "activeUnitsCount",
           "lowerHeatingValue",
           "operatingHours",
           "outsideTemperature",
-          "totalOperatingHours",
-          "unitPowerPercentage",
-          "unitType"
+          "stationId",
+          "unitPowerPercentage"
         ],
         "type": "object",
         "properties": {
-          "unitType": {
-            "minLength": 1,
-            "type": "string"
-          },
-          "activeUnitsCount": {
-            "maximum": 100,
-            "minimum": 1,
+          "stationId": {
             "type": "integer",
             "format": "int32"
           },
@@ -420,15 +572,9 @@
             "type": "number",
             "format": "double"
           },
-          "totalOperatingHours": {
-            "maximum": 100000,
-            "minimum": 0,
-            "type": "number",
-            "format": "double"
-          },
           "unitPowerPercentage": {
             "maximum": 100,
-            "minimum": 0,
+            "minimum": 20,
             "type": "number",
             "format": "double"
           },
@@ -441,7 +587,7 @@
         },
         "additionalProperties": false
       },
-      "ElectricityCalculationResponse": {
+      "ElectricityCalculationResponseDTO": {
         "type": "object",
         "properties": {
           "gasConsumption": {
@@ -463,46 +609,118 @@
         },
         "additionalProperties": false
       },
-      "ElectricityConsumptionData": {
+      "Person": {
+        "type": "object",
+        "properties": {
+          "login": {
+            "type": "string",
+            "nullable": true
+          },
+          "password": {
+            "type": "string",
+            "nullable": true
+          },
+          "role": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "PowerStationRequestDTO": {
+        "required": [
+          "activeUnitsCount",
+          "launchDate",
+          "name",
+          "unitType"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "unitType": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string"
+          },
+          "activeUnitsCount": {
+            "maximum": 30,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          },
+          "launchDate": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "UnitPassportRequestDto": {
+        "required": [
+          "engineType",
+          "unitType"
+        ],
+        "type": "object",
+        "properties": {
+          "unitType": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string"
+          },
+          "engineType": {
+            "minLength": 1,
+            "pattern": "^(Поршневой|Газотурбинный)$",
+            "type": "string"
+          },
+          "ratedPower": {
+            "maximum": 100000,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          },
+          "standartPower": {
+            "maximum": 100000,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          },
+          "consumptionNorm": {
+            "maximum": 1000,
+            "minimum": 0.1,
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "UnitPassportResponseDto": {
         "type": "object",
         "properties": {
           "id": {
             "type": "integer",
             "format": "int32"
           },
-          "timestamp": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "gasConsumption": {
-            "type": "number",
-            "format": "double"
-          },
           "unitType": {
             "type": "string",
             "nullable": true
           },
-          "activeUnitsCount": {
+          "engineType": {
+            "type": "string",
+            "nullable": true
+          },
+          "ratedPower": {
             "type": "integer",
             "format": "int32"
           },
-          "outsideTemperature": {
-            "type": "number",
-            "format": "double"
+          "standartPower": {
+            "type": "integer",
+            "format": "int32"
           },
-          "operatingHours": {
-            "type": "number",
-            "format": "double"
-          },
-          "totalOperatingHours": {
-            "type": "number",
-            "format": "double"
-          },
-          "unitPowerPercentage": {
-            "type": "number",
-            "format": "double"
-          },
-          "lowerHeatingValue": {
+          "consumptionNorm": {
             "type": "number",
             "format": "double"
           }
