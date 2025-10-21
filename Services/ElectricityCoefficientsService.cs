@@ -66,13 +66,8 @@ namespace GasForecast.Services
         {
             // Определяем диапазон мощности
             string powerRange = GetPowerRange(powerPercentage);
-
             var powerData = _coefficients.PowerCoefficient.Data
                 .FirstOrDefault(x => x.PowerRange == powerRange);
-
-            if (powerData == null)
-                return 1.0;
-
             // Выбираем коэффициент в зависимости от типа двигателя
             return engineType.ToLower() switch
             {

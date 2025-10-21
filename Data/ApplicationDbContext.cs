@@ -22,7 +22,7 @@ namespace GasForecast.Data
                 entity.Property(e => e.Name).IsRequired().HasMaxLength(200);
                 entity.Property(e => e.UnitType).IsRequired().HasMaxLength(100);
                 entity.Property(e => e.LaunchDate).IsRequired();
-                entity.Property(e => e.GasConsumption);
+               // entity.Property(e => e.GasConsumption);
     });
 
             modelBuilder.Entity<ElectricalUnitPassport>(entity =>

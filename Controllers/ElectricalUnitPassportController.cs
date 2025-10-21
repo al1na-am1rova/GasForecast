@@ -1,8 +1,10 @@
 ﻿using GasForecast.Data;
 using GasForecast.Models;
+using GasForecast.Models.DTO;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using static System.Collections.Specialized.BitVector32;
 
 namespace GasForecast.Controllers
 {
@@ -33,7 +35,7 @@ namespace GasForecast.Controllers
             }
         }
 
-        [HttpGet("get_passport_by_id{id}")]
+        [HttpGet("get_passport_by_id/{id}")]
         [Authorize]
         public async Task<ActionResult<ElectricalUnitPassport>> GetElectricalUnitPassport(int id)
         {
@@ -56,8 +58,8 @@ namespace GasForecast.Controllers
 
         [HttpPost("create_unit_passport")]
         [Authorize(Roles = "admin")]
-        public async Task<ActionResult<UnitPassportResponseDto>> CreateElectricalUnitPassport(
-    UnitPassportRequestDto createDto)
+        public async Task<ActionResult<ElectricalUnitPassport>> CreateElectricalUnitPassport(
+    ElectricalUnitPassportCreateDTO createDto)
         {
             // Проверяем, существует ли уже станция с таким названием
             var existingStation = await _context.ElectricalUnitPassports
@@ -80,22 +82,22 @@ namespace GasForecast.Controllers
             _context.ElectricalUnitPassports.Add(passport);
             await _context.SaveChangesAsync();
 
-            var responseDto = new UnitPassportResponseDto
-            {
-                Id = passport.Id,
-                UnitType = passport.UnitType,
-                EngineType = passport.EngineType,
-                RatedPower = passport.RatedPower,
-                StandartPower = passport.StandartPower,
-                ConsumptionNorm = passport.ConsumptionNorm
-            };
+            //var responseDto = new ElectricalUnitPassportResponseDTO
+            //{
+            //    Id = passport.Id,
+            //    UnitType = passport.UnitType,
+            //    EngineType = passport.EngineType,
+            //    RatedPower = passport.RatedPower,
+            //    StandartPower = passport.StandartPower,
+            //    ConsumptionNorm = passport.ConsumptionNorm
+            //};
 
-            return CreatedAtAction(nameof(GetElectricalUnitPassport), new { id = passport.Id }, responseDto);
+            return CreatedAtAction(nameof(GetElectricalUnitPassport), new { id = passport.Id }, passport);
         }
 
-        [HttpPut("update_unit_passport{id}")]
+        [HttpPut("update_unit_passport/{id}")]
         [Authorize(Roles = "admin")]
-        public async Task<IActionResult> UpdateElectricalUnitPassport(int id, UnitPassportRequestDto updateDto)
+        public async Task<IActionResult> UpdateElectricalUnitPassport(int id, ElectricalUnitPassportUpdateDTO updateDto)
         {
             try
             {
@@ -110,14 +112,24 @@ namespace GasForecast.Controllers
                     return NotFound($"Паспорт электроагрегата с ID {id} не найден");
                 }
 
-                // Обновляем ТОЛЬКО разрешенные поля
-                existingPassport.RatedPower = updateDto.RatedPower;
-                existingPassport.StandartPower = updateDto.StandartPower;
-                existingPassport.ConsumptionNorm = updateDto.ConsumptionNorm;
+                if (updateDto.UnitType != null)
+                    existingPassport.UnitType = updateDto.UnitType;
+
+                if (updateDto.EngineType != null)
+                    existingPassport.EngineType = updateDto.EngineType;
+
+                if (updateDto.RatedPower.HasValue)
+                    existingPassport.RatedPower = updateDto.RatedPower.Value;
+
+                if (updateDto.StandartPower.HasValue)
+                    existingPassport.StandartPower = updateDto.StandartPower.Value;
+
+                if (updateDto.ConsumptionNorm.HasValue)
+                    existingPassport.ConsumptionNorm = updateDto.ConsumptionNorm.Value;
 
                 await _context.SaveChangesAsync();
 
-                return NoContent();
+                return Ok(existingPassport);
             }
             catch (Exception ex)
             {
@@ -125,7 +137,8 @@ namespace GasForecast.Controllers
             }
         }
 
-        [HttpDelete("delete_unit_passport_by_id{id}")]
+
+        [HttpDelete("delete_unit_passport_by_id/{id}")]
         [Authorize(Roles = "admin")]
         public async Task<IActionResult> DeleteElectricalUnitPassport(int id)
         {
@@ -140,7 +153,11 @@ namespace GasForecast.Controllers
                 _context.ElectricalUnitPassports.Remove(passport);
                 await _context.SaveChangesAsync();
 
-                return NoContent();
+                return Ok(new
+                {
+                    Message = $"паспорт электроагрегата '{passport.UnitType}' успешно удален.",
+                    PassportID = id
+                });
             }
             catch (Exception ex)
             {

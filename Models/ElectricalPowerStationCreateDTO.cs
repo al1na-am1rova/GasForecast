@@ -1,9 +1,8 @@
-// Models/DTO/CreateStationRequest.cs
 using System.ComponentModel.DataAnnotations;
 
 namespace GasForecast.Models.DTO
 {
-    public class PowerStationRequestDTO
+    public class ElectricalPowerStationCreateDTO
     {
         [Required(ErrorMessage = "Название ЭСН обязательно")]
         [StringLength(200, ErrorMessage = "Название не должно превышать 200 символов")]
@@ -18,6 +17,8 @@ namespace GasForecast.Models.DTO
         public int ActiveUnitsCount { get; set; }
 
         [Required(ErrorMessage = "Дата запуска обязательна")]
+        [DataType(DataType.Date)]
+        [LaunchDateNotFuture(ErrorMessage = "Дата запуска не может быть позже текущей даты")]
         public DateTime LaunchDate { get; set; }
     }
 }

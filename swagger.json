@@ -43,7 +43,7 @@
         }
       }
     },
-    "/api/ElectricalUnitPassport/get_passport_by_id{id}": {
+    "/api/ElectricalUnitPassport/get_passport_by_id/{id}": {
       "get": {
         "tags": [
           "ElectricalUnitPassport"
@@ -92,17 +92,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UnitPassportRequestDto"
+                "$ref": "#/components/schemas/ElectricalUnitPassportCreateDTO"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/UnitPassportRequestDto"
+                "$ref": "#/components/schemas/ElectricalUnitPassportCreateDTO"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/UnitPassportRequestDto"
+                "$ref": "#/components/schemas/ElectricalUnitPassportCreateDTO"
               }
             }
           }
@@ -113,17 +113,17 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/UnitPassportResponseDto"
+                  "$ref": "#/components/schemas/ElectricalUnitPassport"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UnitPassportResponseDto"
+                  "$ref": "#/components/schemas/ElectricalUnitPassport"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UnitPassportResponseDto"
+                  "$ref": "#/components/schemas/ElectricalUnitPassport"
                 }
               }
             }
@@ -131,7 +131,7 @@
         }
       }
     },
-    "/api/ElectricalUnitPassport/update_unit_passport{id}": {
+    "/api/ElectricalUnitPassport/update_unit_passport/{id}": {
       "put": {
         "tags": [
           "ElectricalUnitPassport"
@@ -151,17 +151,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UnitPassportRequestDto"
+                "$ref": "#/components/schemas/ElectricalUnitPassportUpdateDTO"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/UnitPassportRequestDto"
+                "$ref": "#/components/schemas/ElectricalUnitPassportUpdateDTO"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/UnitPassportRequestDto"
+                "$ref": "#/components/schemas/ElectricalUnitPassportUpdateDTO"
               }
             }
           }
@@ -173,7 +173,7 @@
         }
       }
     },
-    "/api/ElectricalUnitPassport/delete_unit_passport_by_id{id}": {
+    "/api/ElectricalUnitPassport/delete_unit_passport_by_id/{id}": {
       "delete": {
         "tags": [
           "ElectricalUnitPassport"
@@ -300,17 +300,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/PowerStationRequestDTO"
+                "$ref": "#/components/schemas/ElectricalPowerStationCreateDTO"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/PowerStationRequestDTO"
+                "$ref": "#/components/schemas/ElectricalPowerStationCreateDTO"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/PowerStationRequestDTO"
+                "$ref": "#/components/schemas/ElectricalPowerStationCreateDTO"
               }
             }
           }
@@ -422,17 +422,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/PowerStationRequestDTO"
+                "$ref": "#/components/schemas/ElectricalPowerStationUpdateDTO"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/PowerStationRequestDTO"
+                "$ref": "#/components/schemas/ElectricalPowerStationUpdateDTO"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/PowerStationRequestDTO"
+                "$ref": "#/components/schemas/ElectricalPowerStationUpdateDTO"
               }
             }
           }
@@ -461,21 +461,64 @@
         }
       }
     },
+    "/api/ElectricityPowerStation/get_passport_by_station_id/{id}": {
+      "get": {
+        "tags": [
+          "ElectricityPowerStation"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/ElectricityPowerStation/stations_grouped_by_unit_type": {
+      "get": {
+        "tags": [
+          "ElectricityPowerStation"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/login": {
       "post": {
         "tags": [
           "GasForecast"
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/Person"
-              }
+        "parameters": [
+          {
+            "name": "entered_login",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
             }
           },
-          "required": true
-        },
+          {
+            "name": "entered_password",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -508,10 +551,68 @@
           "launchDate": {
             "type": "string",
             "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ElectricalPowerStationCreateDTO": {
+        "required": [
+          "activeUnitsCount",
+          "launchDate",
+          "name",
+          "unitType"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
           },
-          "gasConsumption": {
-            "type": "number",
-            "format": "double"
+          "unitType": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string"
+          },
+          "activeUnitsCount": {
+            "maximum": 30,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          },
+          "launchDate": {
+            "type": "string",
+            "format": "date"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ElectricalPowerStationUpdateDTO": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "unitType": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "activeUnitsCount": {
+            "maximum": 30,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "launchDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -546,122 +647,12 @@
         },
         "additionalProperties": false
       },
-      "ElectricityCalculationRequestDTO": {
+      "ElectricalUnitPassportCreateDTO": {
         "required": [
-          "lowerHeatingValue",
-          "operatingHours",
-          "outsideTemperature",
-          "stationId",
-          "unitPowerPercentage"
-        ],
-        "type": "object",
-        "properties": {
-          "stationId": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "outsideTemperature": {
-            "maximum": 50,
-            "minimum": -50,
-            "type": "number",
-            "format": "double"
-          },
-          "operatingHours": {
-            "maximum": 10000,
-            "minimum": 0,
-            "type": "number",
-            "format": "double"
-          },
-          "unitPowerPercentage": {
-            "maximum": 100,
-            "minimum": 20,
-            "type": "number",
-            "format": "double"
-          },
-          "lowerHeatingValue": {
-            "maximum": 10000,
-            "minimum": 7000,
-            "type": "number",
-            "format": "double"
-          }
-        },
-        "additionalProperties": false
-      },
-      "ElectricityCalculationResponseDTO": {
-        "type": "object",
-        "properties": {
-          "gasConsumption": {
-            "type": "number",
-            "format": "double"
-          },
-          "unit": {
-            "type": "string",
-            "nullable": true
-          },
-          "calculationTime": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "calculationId": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "additionalProperties": false
-      },
-      "Person": {
-        "type": "object",
-        "properties": {
-          "login": {
-            "type": "string",
-            "nullable": true
-          },
-          "password": {
-            "type": "string",
-            "nullable": true
-          },
-          "role": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "additionalProperties": false
-      },
-      "PowerStationRequestDTO": {
-        "required": [
-          "activeUnitsCount",
-          "launchDate",
-          "name",
-          "unitType"
-        ],
-        "type": "object",
-        "properties": {
-          "name": {
-            "maxLength": 200,
-            "minLength": 0,
-            "type": "string"
-          },
-          "unitType": {
-            "maxLength": 100,
-            "minLength": 0,
-            "type": "string"
-          },
-          "activeUnitsCount": {
-            "maximum": 30,
-            "minimum": 1,
-            "type": "integer",
-            "format": "int32"
-          },
-          "launchDate": {
-            "type": "string",
-            "format": "date-time"
-          }
-        },
-        "additionalProperties": false
-      },
-      "UnitPassportRequestDto": {
-        "required": [
+          "consumptionNorm",
           "engineType",
+          "ratedPower",
+          "standartPower",
           "unitType"
         ],
         "type": "object",
@@ -697,32 +688,99 @@
         },
         "additionalProperties": false
       },
-      "UnitPassportResponseDto": {
+      "ElectricalUnitPassportUpdateDTO": {
         "type": "object",
         "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int32"
-          },
           "unitType": {
+            "maxLength": 100,
+            "minLength": 0,
             "type": "string",
             "nullable": true
           },
           "engineType": {
+            "pattern": "^(Поршневой|Газотурбинный)$",
             "type": "string",
             "nullable": true
           },
           "ratedPower": {
+            "maximum": 100000,
+            "minimum": 1,
             "type": "integer",
-            "format": "int32"
+            "format": "int32",
+            "nullable": true
           },
           "standartPower": {
+            "maximum": 100000,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "consumptionNorm": {
+            "maximum": 1000,
+            "minimum": 0.1,
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ElectricityCalculationRequestDTO": {
+        "required": [
+          "lowerHeatingValue",
+          "operatingHours",
+          "outsideTemperature",
+          "stationId",
+          "unitPowerPercentage"
+        ],
+        "type": "object",
+        "properties": {
+          "stationId": {
             "type": "integer",
             "format": "int32"
           },
-          "consumptionNorm": {
+          "outsideTemperature": {
+            "maximum": 40,
+            "minimum": -30,
             "type": "number",
             "format": "double"
+          },
+          "operatingHours": {
+            "maximum": 100000,
+            "minimum": 0,
+            "type": "number",
+            "format": "double"
+          },
+          "unitPowerPercentage": {
+            "maximum": 100,
+            "minimum": 20,
+            "type": "number",
+            "format": "double"
+          },
+          "lowerHeatingValue": {
+            "maximum": 10000,
+            "minimum": 7000,
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ElectricityCalculationResponseDTO": {
+        "type": "object",
+        "properties": {
+          "gasConsumption": {
+            "type": "number",
+            "format": "double"
+          },
+          "unit": {
+            "type": "string",
+            "nullable": true
+          },
+          "calculationTime": {
+            "type": "string",
+            "format": "date-time"
           }
         },
         "additionalProperties": false

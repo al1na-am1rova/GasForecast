@@ -17,7 +17,8 @@ namespace GasForecast.Services
             double unitPowerPercentage,
             string unitType,
             int activeUnitsCount,
-            double lowerHeatingValue);
+            double lowerHeatingValue,
+            string EngineType);
     }
 
     public class ElectricityConsumptionCalculator : IElectricityConsumptionCalculator
@@ -37,13 +38,14 @@ namespace GasForecast.Services
             double CurrentPowerPercentage,
             string UnitType,
             int ActiveUnitsCount,
-            double LowerHeatingValue)
+            double LowerHeatingValue,
+            string EngineType)
         {
 
             // Получаем нормы из сервиса
             var AtmosphericCoefficient = _coefficientService.GetTemperatureCoefficient(OutsideTemperature);
             var OperatingHoursCoefficient = _coefficientService.GetOperatingTimeCoefficient(TotalOperatingHours);
-            var PowerCoefficient = _coefficientService.GetPowerCoefficient(UnitType, CurrentPowerPercentage);
+            var PowerCoefficient = _coefficientService.GetPowerCoefficient(EngineType, CurrentPowerPercentage);
 
 
             // Проверяем, что все необходимые данные есть
@@ -62,7 +64,8 @@ namespace GasForecast.Services
                 OperatingHoursCoefficient,
                 PowerCoefficient,
                 ActiveUnitsCount,
-                LowerHeatingValue
+                LowerHeatingValue,
+                EngineType
             );
 
             return gasConsumption;
@@ -76,10 +79,15 @@ namespace GasForecast.Services
             double OperatingHoursCoefficient,
             double PowerCoefficient,
             int ActiveUnitsCount,
-            double LowerHeatingValue)
+            double LowerHeatingValue,
+            string EngineType)
         {
 
             double correctionK = 1.1 * AtmosphericCoefficient * OperatingHoursCoefficient * PowerCoefficient;
+            Console.WriteLine(AtmosphericCoefficient);
+            Console.WriteLine(OperatingHoursCoefficient);
+            Console.WriteLine(PowerCoefficient);
+            Console.WriteLine(correctionK);
 
             double calorieK = LowerHeatingValue / 7000;
 

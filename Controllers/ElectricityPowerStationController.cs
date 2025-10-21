@@ -41,7 +41,7 @@ namespace GasForecast.Controllers
 
         [HttpPost("add_electrical_station")]
         [Authorize(Roles = "admin")]
-        public async Task<ActionResult<ElectricalPowerStation>> CreateStation([FromBody] PowerStationRequestDTO request)
+        public async Task<ActionResult<ElectricalPowerStation>> CreateStation([FromBody] ElectricalPowerStationCreateDTO request)
         {
             try
             {
@@ -145,7 +145,7 @@ namespace GasForecast.Controllers
         [HttpPut("update_electrical_station/{id}")]
         [Authorize(Roles = "admin")]
 
-        public async Task<ActionResult<ElectricalPowerStation>> UpdateStation(int id, [FromBody] PowerStationRequestDTO request)
+        public async Task<ActionResult<ElectricalPowerStation>> UpdateStation(int id, [FromBody] ElectricalPowerStationUpdateDTO request)
         {
             try
             {
@@ -164,7 +164,7 @@ namespace GasForecast.Controllers
                 }
 
                 // Проверяем, существует ли другая станция с таким же названием (если имя изменилось)
-                if (station.Name != request.Name)
+                if (request.Name != null && station.Name != request.Name)
                 {
                     var existingStationWithSameName = await _context.ElectricalPowerStations
                         .FirstOrDefaultAsync(s => s.Name == request.Name && s.Id != id);
@@ -175,11 +175,10 @@ namespace GasForecast.Controllers
                     }
                 }
 
-                // Обновляем только разрешенные поля
-                station.Name = request.Name;
-                station.ActiveUnitsCount = request.ActiveUnitsCount;
-                station.UnitType = request.UnitType;
-                station.LaunchDate = request.LaunchDate;
+                if (request.Name != null) station.Name = request.Name;
+                if (request.ActiveUnitsCount.HasValue) station.ActiveUnitsCount = request.ActiveUnitsCount.Value;
+                if (request.UnitType != null) station.UnitType = request.UnitType;
+                if (request.LaunchDate.HasValue) station.LaunchDate = request.LaunchDate.Value;
 
                 // Сохраняем изменения
                 await _context.SaveChangesAsync();
@@ -190,6 +189,62 @@ namespace GasForecast.Controllers
             {
                 return StatusCode(500, $"Ошибка при обновлении ЭСН: {ex.Message}");
             }
+        }
+
+
+        [HttpGet("get_passport_by_station_id/{id}")]
+        [Authorize]
+        public async Task<ActionResult> GetUnitPassportsByStationId(int id)
+        {
+            var result = await (from s in _context.ElectricalPowerStations
+                                join u in _context.ElectricalUnitPassports
+                                on s.UnitType equals u.UnitType
+                                where s.Id == id
+                                select new
+                                {
+                                    StationId = s.Id,
+                                    StationName = s.Name,
+                                    ActiveUnitsCount = s.ActiveUnitsCount,
+                                    LaunchDate = s.LaunchDate,
+
+                                    UnitId = u.Id,
+                                    UnitType = u.UnitType,
+                                    EngineType = u.EngineType,
+                                    RatedPower = u.RatedPower,
+                                    StandartPower = u.StandartPower,
+                                    ConsumptionNorm = u.ConsumptionNorm
+                                }).FirstOrDefaultAsync(); 
+
+            if (result == null)
+            {
+                return NotFound($"ЭСН с ID {id} не найдена или для неё не найден паспорт агрегата");
+            }
+
+            return Ok(result);
+        }
+
+        [HttpGet("stations_grouped_by_unit_type")]
+        public async Task<ActionResult> GetStationsGroupedByUnitType()
+        {
+            var result = await (from u in _context.ElectricalUnitPassports
+                                join s in _context.ElectricalPowerStations
+                                on u.UnitType equals s.UnitType into stationGroup
+                                select new
+                                {
+                                    UnitType = u.UnitType,
+                                    EngineType = u.EngineType,
+                                    RatedPower = u.RatedPower,
+                                    StationsCount = stationGroup.Count(),
+                                    Stations = stationGroup.Select(s => new
+                                    {
+                                        s.Id,
+                                        s.Name,
+                                        s.ActiveUnitsCount,
+                                        s.LaunchDate
+                                    }).ToList()
+                                }).ToListAsync();
+
+            return Ok(result);
         }
 
 

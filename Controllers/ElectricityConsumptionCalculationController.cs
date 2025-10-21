@@ -59,9 +59,11 @@ namespace GasForecast.Controllers
                 var GasConsumptionNorm = unitPassport.ConsumptionNorm;
                 var TotalOperatingHours = (DateTime.Now - existingStation.LaunchDate).TotalHours;
 
+                var EngineType = unitPassport.EngineType;
+
                 var result = _calculator.CalculateGasConsumption(StandartPower, GasConsumptionNorm, OutsideTemperature, 
                     TotalOperatingHours, OperatingHours, UnitPowerPercentage, 
-                    UnitType, ActiveUnitsCount, LowerHeatingValue);
+                    UnitType, ActiveUnitsCount, LowerHeatingValue, EngineType);
 
                 var response = new ElectricityCalculationResponseDTO
                 {

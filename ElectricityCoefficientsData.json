@@ -85,38 +85,38 @@
     "data": [
       {
         "powerRange": "20-29",
-        "piston": 2.50,
-        "gasTurbine": 2.30
+        "piston": 2.30,
+        "gasTurbine": 2.50
       },
       {
         "powerRange": "30-39",
-        "piston": 1.87,
-        "gasTurbine": 1.70
+        "piston": 1.70,
+        "gasTurbine": 1.87
       },
       {
         "powerRange": "40-49",
-        "piston": 1.50,
-        "gasTurbine": 1.45
+        "piston": 1.45,
+        "gasTurbine": 1.50
       },
       {
         "powerRange": "50-59",
-        "piston": 1.33,
-        "gasTurbine": 1.28
+        "piston": 1.28,
+        "gasTurbine": 1.33
       },
       {
         "powerRange": "60-69",
-        "piston": 1.20,
-        "gasTurbine": 1.18
+        "piston": 1.18,
+        "gasTurbine": 1.20
       },
       {
         "powerRange": "70-79",
-        "piston": 1.12,
-        "gasTurbine": 1.10
+        "piston": 1.10,
+        "gasTurbine": 1.12
       },
       {
         "powerRange": "80-89",
-        "piston": 1.08,
-        "gasTurbine": 1.06
+        "piston": 1.06,
+        "gasTurbine": 1.08
       },
       {
         "powerRange": "90-99",

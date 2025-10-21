@@ -8,7 +8,7 @@ namespace GasForecast.Models.DTO
         public int StationId { get; set; }
 
         [Required(ErrorMessage = "Температура (С) обязательна")]
-        [Range(-50, 50, ErrorMessage = "Температура должна быть в диапазоне от -50°C до 50°C")]
+        [Range(-30, 40, ErrorMessage = "Температура должна быть в диапазоне от -30°C до 40°C")]
         public double OutsideTemperature { get; set; }
 
         [Required(ErrorMessage = "Время работы (ч) обязательно")]
