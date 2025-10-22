@@ -2,60 +2,23 @@ using GasForecast.Auth;
 using GasForecast.Data;
 using GasForecast.Models;
 using GasForecast.Services;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authentication.OAuth;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using System;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
-
-//// условна€ бд с пользовател€ми
-//var people = new List<Person>
-// {
-//    new Person("user", "user", "user"),
-//    new Person("admin", "admin", "admin")
-//};
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
-//builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddOpenApi();
+// Scoped - один экземпл€р на весь запрос
 builder.Services.AddScoped<IElectricityConsumptionCalculator, ElectricityConsumptionCalculator>();
+// Singleton - один экземпл€р на все приложение
 builder.Services.AddSingleton<ElectricityCoefficientsService, ElectricityCoefficientsService>();
 
 
 // –егистрируем DbContext дл€ PostgreSQL
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
-
-//builder.Services.AddAuthorization();
-//builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-//    .AddJwtBearer(options =>
-//    {
-//        options.TokenValidationParameters = new TokenValidationParameters
-//        {
-//            // указывает, будет ли валидироватьс€ издатель при валидации токена
-//            ValidateIssuer = true,
-//            // строка, представл€юща€ издател€
-//            ValidIssuer = AuthOptions.ISSUER,
-//            // будет ли валидироватьс€ потребитель токена
-//            ValidateAudience = true,
-//            // установка потребител€ токена
-//            ValidAudience = AuthOptions.AUDIENCE,
-//            // будет ли валидироватьс€ врем€ существовани€
-//            ValidateLifetime = true,
-//            // установка ключа безопасности
-//            IssuerSigningKey = AuthOptions.GetSymmetricSecurityKey(),
-//            // валидаци€ ключа безопасности
-//            ValidateIssuerSigningKey = true,
-//        };
-//    });
 
 builder.Services.ConfigureAuthentication();
 
@@ -65,7 +28,8 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    dbContext.Database.EnsureCreated(); // »ли используйте миграции
+    //dbContext.Database.EnsureCreated();
+    dbContext.Database.Migrate();
 }
 
 // Configure the HTTP request pipeline.
@@ -84,50 +48,5 @@ app.UseAuthentication();
 
 app.UseAuthorization();
 
-//app.MapPost("/login", (string entered_login, string entered_password) =>
-//{
-//    // находим пользовател€ 
-//    Person? person = people.FirstOrDefault(p => p.Login == entered_login && p.Password == entered_password);
-//    // если пользователь не найден, отправл€ем статусный код 401
-//    if (person is null) return Results.Unauthorized();
-
-//    var claims = new List<Claim>
-//    {
-//    new Claim(ClaimTypes.Name, person.Login),
-//    new Claim(ClaimTypes.Role, person.Role)
-//    };
-//    // создаем JWT-токен
-//    var jwt = new JwtSecurityToken(
-//            issuer: AuthOptions.ISSUER,
-//            audience: AuthOptions.AUDIENCE,
-//            claims: claims,
-//            expires: DateTime.UtcNow.Add(TimeSpan.FromMinutes(20)),
-//            signingCredentials: new SigningCredentials(AuthOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256));
-//    var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
-
-//    // формируем ответ
-//    var response = new
-//    {
-//        access_token = encodedJwt,
-//        username = person.Login,
-//        role = person.Role
-//    };
-
-//    return Results.Json(response);
-//});
-
-//app.Map("/data", [Authorize] () => new { message = "Hello World!" });
-
 app.MapAuthEndpoints();
 app.Run();
-
-//public class AuthOptions
-//{
-//    public const string ISSUER = "MyAuthServer"; // издатель токена
-//    public const string AUDIENCE = "MyAuthClient"; // потребитель токена
-//    const string KEY = "mysupersecret_secretsecretsecretkey!123";   // ключ дл€ шифрации
-//    public static SymmetricSecurityKey GetSymmetricSecurityKey() =>
-//        new SymmetricSecurityKey(Encoding.UTF8.GetBytes(KEY));
-//}
-
-//record class Person(string Login, string Password, string Role);

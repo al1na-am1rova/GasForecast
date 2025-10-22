@@ -28,21 +28,8 @@ namespace GasForecast.Services
                 return exactMatch.Coefficient;
             }
 
-            // Если точного соответствия нет, берем ближайшее значение
-            var sortedData = _coefficients.TemperatureCoefficient.Data
-                .OrderBy(x => x.Temperature)
-                .ToList();
-
-            // Если температура ниже минимальной
-            if (temperature < sortedData.First().Temperature)
-                return sortedData.First().Coefficient;
-
-            // Если температура выше максимальной
-            if (temperature > sortedData.Last().Temperature)
-                return sortedData.Last().Coefficient;
-
             // Находим ближайшее значение температуры
-            var nearest = sortedData
+            var nearest = _coefficients.TemperatureCoefficient.Data
                 .OrderBy(x => Math.Abs(x.Temperature - temperature))
                 .First();
 

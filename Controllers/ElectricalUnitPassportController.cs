@@ -27,6 +27,12 @@ namespace GasForecast.Controllers
             try
             {
                 var passports = await _context.ElectricalUnitPassports.ToListAsync();
+
+                if (!passports.Any())
+                {
+                    return NotFound("Паспорта электрооборудования не найдены");
+                }
+
                 return Ok(passports);
             }
             catch (Exception ex)
@@ -45,7 +51,7 @@ namespace GasForecast.Controllers
 
                 if (passport == null)
                 {
-                    return NotFound($"Паспорт электроагрегата с {id} не найден");
+                    return NotFound($"Паспорт электроагрегата с id = {id} не найден");
                 }
 
                 return Ok(passport);
@@ -82,16 +88,6 @@ namespace GasForecast.Controllers
             _context.ElectricalUnitPassports.Add(passport);
             await _context.SaveChangesAsync();
 
-            //var responseDto = new ElectricalUnitPassportResponseDTO
-            //{
-            //    Id = passport.Id,
-            //    UnitType = passport.UnitType,
-            //    EngineType = passport.EngineType,
-            //    RatedPower = passport.RatedPower,
-            //    StandartPower = passport.StandartPower,
-            //    ConsumptionNorm = passport.ConsumptionNorm
-            //};
-
             return CreatedAtAction(nameof(GetElectricalUnitPassport), new { id = passport.Id }, passport);
         }
 
@@ -103,13 +99,19 @@ namespace GasForecast.Controllers
             {
                 if (!ModelState.IsValid)
                 {
-                    return BadRequest(ModelState);
+                    return BadRequest(new
+                    {
+                        Message = "Неверные данные",
+                        Errors = ModelState.Values
+                        .SelectMany(v => v.Errors)
+                        .Select(e => e.ErrorMessage)
+                    });
                 }
 
                 var existingPassport = await _context.ElectricalUnitPassports.FindAsync(id);
                 if (existingPassport == null)
                 {
-                    return NotFound($"Паспорт электроагрегата с ID {id} не найден");
+                    return NotFound($"Паспорт электроагрегата с id = {id} не найден");
                 }
 
                 if (updateDto.UnitType != null)
@@ -147,7 +149,7 @@ namespace GasForecast.Controllers
                 var passport = await _context.ElectricalUnitPassports.FindAsync(id);
                 if (passport == null)
                 {
-                    return NotFound($"Паспорт электроагрегата с {id} не найден");
+                    return NotFound($"Паспорт электроагрегата с id = {id} не найден");
                 }
 
                 _context.ElectricalUnitPassports.Remove(passport);
