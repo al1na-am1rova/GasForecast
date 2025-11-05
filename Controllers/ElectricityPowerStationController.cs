@@ -21,7 +21,7 @@ namespace GasForecast.Controllers
             _context = context;
         }
 
-        [HttpGet("read_all_stations")]
+        [HttpGet("read_all")]
         [Authorize]
         public async Task<ActionResult<IEnumerable<ElectricalPowerStation>>> GetAllStations()
         {
@@ -31,6 +31,11 @@ namespace GasForecast.Controllers
                     .OrderBy(s => s.Id)
                     .ToListAsync();
 
+                if (!stations.Any())
+                {
+                    return NotFound("ЭСН не найдены");
+                }
+
                 return Ok(stations);
             }
             catch (Exception ex)
@@ -39,7 +44,7 @@ namespace GasForecast.Controllers
             }
         }
 
-        [HttpPost("add_electrical_station")]
+        [HttpPost("add")]
         [Authorize(Roles = "admin")]
         public async Task<ActionResult<ElectricalPowerStation>> CreateStation([FromBody] ElectricalPowerStationCreateDTO request)
         {
@@ -85,7 +90,7 @@ namespace GasForecast.Controllers
             }
         }
 
-        [HttpGet("get_station_by_id/{id}")]
+        [HttpGet("{id}")]
         [Authorize]
         public async Task<ActionResult<ElectricalPowerStation>> GetStationById(int id)
         {
@@ -107,7 +112,7 @@ namespace GasForecast.Controllers
             }
         }
 
-        [HttpDelete("delete_station/{id}")]
+        [HttpDelete("delete/{id}")]
         [Authorize(Roles = "admin")]
         public async Task<ActionResult> DeleteStation(int id)
         {
@@ -142,7 +147,7 @@ namespace GasForecast.Controllers
             }
         }
 
-        [HttpPut("update_electrical_station/{id}")]
+        [HttpPut("update/{id}")]
         [Authorize(Roles = "admin")]
 
         public async Task<ActionResult<ElectricalPowerStation>> UpdateStation(int id, [FromBody] ElectricalPowerStationUpdateDTO request)

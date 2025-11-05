@@ -84,10 +84,6 @@ namespace GasForecast.Services
         {
 
             double correctionK = 1.1 * AtmosphericCoefficient * OperatingHoursCoefficient * PowerCoefficient;
-            Console.WriteLine(AtmosphericCoefficient);
-            Console.WriteLine(OperatingHoursCoefficient);
-            Console.WriteLine(PowerCoefficient);
-            Console.WriteLine(correctionK);
 
             double calorieK = LowerHeatingValue / 7000;
 

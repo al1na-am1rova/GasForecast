@@ -2,7 +2,9 @@ using GasForecast.Auth;
 using GasForecast.Data;
 using GasForecast.Models;
 using GasForecast.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,13 +16,38 @@ builder.Services.AddOpenApi();
 builder.Services.AddScoped<IElectricityConsumptionCalculator, ElectricityConsumptionCalculator>();
 // Singleton - один экземпл€р на все приложение
 builder.Services.AddSingleton<ElectricityCoefficientsService, ElectricityCoefficientsService>();
-
+// ƒобавл€ем в Program.cs
+builder.Services.AddScoped<IAuthService, AuthService>();
 
 // –егистрируем DbContext дл€ PostgreSQL
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.ConfigureAuthentication();
+builder.Services.AddAuthorization();
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.RequireHttpsMetadata = false;
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            // укзывает, будет ли валидироватьс€ издатель при валидации токена
+            ValidateIssuer = true,
+            // строка, представл€юща€ издател€
+            ValidIssuer = AuthOptions.ISSUER,
+
+            // будет ли валидироватьс€ потребитель токена
+            ValidateAudience = true,
+            // установка потребител€ токена
+            ValidAudience = AuthOptions.AUDIENCE,
+            // будет ли валидироватьс€ врем€ существовани€
+            ValidateLifetime = true,
+
+            // установка ключа безопасности
+            IssuerSigningKey = AuthOptions.GetSymmetricSecurityKey(),
+            // валидаци€ ключа безопасности
+            ValidateIssuerSigningKey = true,
+        };
+    });
 
 var app = builder.Build();
 
@@ -48,5 +75,4 @@ app.UseAuthentication();
 
 app.UseAuthorization();
 
-app.MapAuthEndpoints();
 app.Run();

@@ -19,7 +19,7 @@ namespace GasForecast.Controllers
             _context = context;
         }
 
-        [HttpGet("read_all_unit_passports")]
+        [HttpGet("read_all")]
         [Authorize]
 
         public async Task<ActionResult<IEnumerable<ElectricalUnitPassport>>> GetElectricalUnitPassports()
@@ -41,7 +41,7 @@ namespace GasForecast.Controllers
             }
         }
 
-        [HttpGet("get_passport_by_id/{id}")]
+        [HttpGet("{id}")]
         [Authorize]
         public async Task<ActionResult<ElectricalUnitPassport>> GetElectricalUnitPassport(int id)
         {
@@ -62,7 +62,7 @@ namespace GasForecast.Controllers
             }
         }
 
-        [HttpPost("create_unit_passport")]
+        [HttpPost("create")]
         [Authorize(Roles = "admin")]
         public async Task<ActionResult<ElectricalUnitPassport>> CreateElectricalUnitPassport(
     ElectricalUnitPassportCreateDTO createDto)
@@ -91,7 +91,7 @@ namespace GasForecast.Controllers
             return CreatedAtAction(nameof(GetElectricalUnitPassport), new { id = passport.Id }, passport);
         }
 
-        [HttpPut("update_unit_passport/{id}")]
+        [HttpPut("update/{id}")]
         [Authorize(Roles = "admin")]
         public async Task<IActionResult> UpdateElectricalUnitPassport(int id, ElectricalUnitPassportUpdateDTO updateDto)
         {
@@ -140,7 +140,7 @@ namespace GasForecast.Controllers
         }
 
 
-        [HttpDelete("delete_unit_passport_by_id/{id}")]
+        [HttpDelete("delete/{id}")]
         [Authorize(Roles = "admin")]
         public async Task<IActionResult> DeleteElectricalUnitPassport(int id)
         {

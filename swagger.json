@@ -5,7 +5,50 @@
     "version": "1.0"
   },
   "paths": {
-    "/api/ElectricalUnitPassport/read_all_unit_passports": {
+    "/api/Account/login": {
+      "post": {
+        "tags": [
+          "Account"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginData"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginData"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginData"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Account/validate": {
+      "get": {
+        "tags": [
+          "Account"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/ElectricalUnitPassport/read_all": {
       "get": {
         "tags": [
           "ElectricalUnitPassport"
@@ -43,7 +86,7 @@
         }
       }
     },
-    "/api/ElectricalUnitPassport/get_passport_by_id/{id}": {
+    "/api/ElectricalUnitPassport/{id}": {
       "get": {
         "tags": [
           "ElectricalUnitPassport"
@@ -83,7 +126,7 @@
         }
       }
     },
-    "/api/ElectricalUnitPassport/create_unit_passport": {
+    "/api/ElectricalUnitPassport/create": {
       "post": {
         "tags": [
           "ElectricalUnitPassport"
@@ -131,7 +174,7 @@
         }
       }
     },
-    "/api/ElectricalUnitPassport/update_unit_passport/{id}": {
+    "/api/ElectricalUnitPassport/update/{id}": {
       "put": {
         "tags": [
           "ElectricalUnitPassport"
@@ -173,7 +216,7 @@
         }
       }
     },
-    "/api/ElectricalUnitPassport/delete_unit_passport_by_id/{id}": {
+    "/api/ElectricalUnitPassport/delete/{id}": {
       "delete": {
         "tags": [
           "ElectricalUnitPassport"
@@ -196,7 +239,7 @@
         }
       }
     },
-    "/api/ElectricityConsumptionCalculation/calculate_electricity_gas_consumption": {
+    "/api/ElectricityConsumptionCalculation/calculate": {
       "get": {
         "tags": [
           "ElectricityConsumptionCalculation"
@@ -253,7 +296,7 @@
         }
       }
     },
-    "/api/ElectricityPowerStation/read_all_stations": {
+    "/api/ElectricityPowerStation/read_all": {
       "get": {
         "tags": [
           "ElectricityPowerStation"
@@ -291,7 +334,7 @@
         }
       }
     },
-    "/api/ElectricityPowerStation/add_electrical_station": {
+    "/api/ElectricityPowerStation/add": {
       "post": {
         "tags": [
           "ElectricityPowerStation"
@@ -339,7 +382,7 @@
         }
       }
     },
-    "/api/ElectricityPowerStation/get_station_by_id/{id}": {
+    "/api/ElectricityPowerStation/{id}": {
       "get": {
         "tags": [
           "ElectricityPowerStation"
@@ -379,7 +422,7 @@
         }
       }
     },
-    "/api/ElectricityPowerStation/delete_station/{id}": {
+    "/api/ElectricityPowerStation/delete/{id}": {
       "delete": {
         "tags": [
           "ElectricityPowerStation"
@@ -402,7 +445,7 @@
         }
       }
     },
-    "/api/ElectricityPowerStation/update_electrical_station/{id}": {
+    "/api/ElectricityPowerStation/update/{id}": {
       "put": {
         "tags": [
           "ElectricityPowerStation"
@@ -488,36 +531,6 @@
       "get": {
         "tags": [
           "ElectricityPowerStation"
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/login": {
-      "post": {
-        "tags": [
-          "GasForecast"
-        ],
-        "parameters": [
-          {
-            "name": "entered_login",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "entered_password",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
         ],
         "responses": {
           "200": {
@@ -781,6 +794,20 @@
           "calculationTime": {
             "type": "string",
             "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "LoginData": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "nullable": true
+          },
+          "password": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false
