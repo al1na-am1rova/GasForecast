@@ -24,7 +24,7 @@ namespace GasForecast.Controllers
             _calculator = calculator;
         }
 
-        [HttpGet("calculate")]
+        [HttpPost("calculate")]
         [Authorize]
 
         public async Task<ActionResult<IEnumerable<ElectricityCalculationResponseDTO>>> CalculateElectricityGasConsumption(ElectricityCalculationRequestDTO request)

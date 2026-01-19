@@ -17,11 +17,25 @@ builder.Services.AddScoped<IElectricityConsumptionCalculator, ElectricityConsump
 // Singleton - один экземпляр на все приложение
 builder.Services.AddSingleton<ElectricityCoefficientsService, ElectricityCoefficientsService>();
 // Добавляем в Program.cs
-builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IAccountService, AccountService>();
 
 // Регистрируем DbContext для PostgreSQL
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAngular", policy =>
+    {
+        policy.WithOrigins(
+            "http://localhost:4200",    // Angular dev server
+            "https://localhost:4200"    // если используете HTTPS
+        )
+        .AllowAnyHeader()
+        .AllowAnyMethod()
+        .AllowCredentials();
+    });
+});
 
 builder.Services.AddAuthorization();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -50,6 +64,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 
 var app = builder.Build();
+
+app.UseCors("AllowAngular");
 
 // Создаем базу данных при запуске
 using (var scope = app.Services.CreateScope())

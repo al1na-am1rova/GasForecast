@@ -3,6 +3,7 @@ using System;
 using GasForecast.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace GasForecast.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260110115418_AddUser2")]
+    partial class AddUser2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -92,33 +95,40 @@ namespace GasForecast.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime?>("LastSessionTime")
-                        .HasColumnType("timestamp without time zone");
+                    b.Property<bool>("IsAdmin")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
 
-                    b.Property<string>("Role")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("text")
-                        .HasDefaultValue("False");
-
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
-                    b.Property<bool>("temporaryPassword")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(true);
-
                     b.HasKey("Id");
 
                     b.ToTable("Users", "public");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = -1,
+                            IsAdmin = false,
+                            PasswordHash = "$2a$11$WBgIlRFdjoJkxp3lZA998Oa8GwuMk5c.Js6BEwtrvO.ft9FHjWwL2",
+                            Username = "user"
+                        },
+                        new
+                        {
+                            Id = -2,
+                            IsAdmin = true,
+                            PasswordHash = "$2a$11$5aGsW6MJe3XlWNuiTDrNQePZ9s2BaMPWo13WMDiIgfZ8pJ/syazKK",
+                            Username = "admin"
+                        });
                 });
 #pragma warning restore 612, 618
         }

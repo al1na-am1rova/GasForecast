@@ -21,13 +21,13 @@ namespace GasForecast.Auth
         // Создаем модель для ответа
         public record TokenResponse(string AccessToken, string Username, string Role, DateTime Expires);
 
-        public static TokenResponse GenerateToken(string login, bool isAdmin = false)
+        public static TokenResponse GenerateToken(string login, string role)
         {
 
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, login),
-                new Claim(ClaimTypes.Role, isAdmin ? "admin" : "user")
+                new Claim(ClaimTypes.Role, role)
             };
 
             var now = DateTime.UtcNow;
@@ -49,7 +49,7 @@ namespace GasForecast.Auth
             return new TokenResponse(
                 AccessToken: token,
                 Username: login,
-                Role: isAdmin ? "admin" : "user",
+                Role: role,
                 Expires: expires
             );
         }
