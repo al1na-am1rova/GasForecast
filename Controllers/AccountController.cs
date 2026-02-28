@@ -1,6 +1,7 @@
 ﻿using Azure.Core;
 using GasForecast.Data;
 using GasForecast.Models;
+using GasForecast.Models.DTO;
 using GasForecast.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -159,6 +160,7 @@ public class AccountController : ControllerBase
             var users = _context.Users
                 .Select(u => new
                 {
+                    id = u.Id,
                     UserName = u.Username,
                     Role = u.Role,
                     lastSessionTime = u.LastSessionTime.HasValue
@@ -240,6 +242,57 @@ public class AccountController : ControllerBase
         {
             // 5. Обработка ошибок
             return StatusCode(500, $"Ошибка сервера: {ex.Message}");
+        }
+    }
+
+    [HttpDelete("delete/{id}")]
+    [Authorize(Roles = "admin")]
+    public async Task<IActionResult> DeleteAccount(int id)
+    {
+        try
+        {
+            var account = await _context.Users.FindAsync(id);
+            if (account == null)
+            {
+                return NotFound($"Аккаунт с id = {id} не найден");
+            }
+
+            _context.Users.Remove(account);
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                Message = $"Аккаунт пользователя '{account.Username}' успешно удален.",
+                AccountID = id
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Внутрення ошибка сервера: {ex.Message}");
+        }
+    }
+
+    [HttpPut("changeRole/{id}")]
+    [Authorize(Roles = "admin")]
+    public async Task<IActionResult> ChangeRole (int id, string newRole)
+    {
+        try
+        {
+            
+            var existingAccount = await _context.Users.FindAsync(id);
+            if (existingAccount == null)
+            {
+                return NotFound($"Аккаунт пользователя с id = {id} не найден");
+            }
+            existingAccount.Role = newRole;
+
+            await _context.SaveChangesAsync();
+
+            return Ok(existingAccount);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Внутренняя ошибка сервера: {ex.Message}");
         }
     }
 
