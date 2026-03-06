@@ -21,6 +21,7 @@ namespace GasForecast.Data
         public DbSet<ElectricalPowerStation> ElectricalPowerStations { get; set; }
         public DbSet<ElectricalUnitPassport> ElectricalUnitPassports { get; set; }
         public DbSet<User> Users{ get; set; }
+        public DbSet<UserElectricalStation> UserElectricalStations { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -55,6 +56,27 @@ namespace GasForecast.Data
                 entity.Property(e => e.LastSessionTime);
                 entity.Property(e => e.temporaryPassword).HasDefaultValue(true);
 
+            });
+
+            modelBuilder.Entity<UserElectricalStation>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                // Настраиваем связь с User
+                entity.HasOne(e => e.User)
+                    .WithMany(u => u.UserElectricalStations)
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                // Настраиваем связь с ElectricalPowerStation
+                entity.HasOne(e => e.ElectricalPowerStation)
+                    .WithMany(eps => eps.UserElectricalStations)
+                    .HasForeignKey(e => e.ElectricalStationId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                // Добавляем уникальный индекс, чтобы у пользователя не было дублей одной станции
+                entity.HasIndex(e => new { e.UserId, e.ElectricalStationId })
+                    .IsUnique();
             });
         }
     }

@@ -40,6 +40,7 @@ namespace GasForecast.Services
 
                 // Генерируем токен с данными из БД
                 return AuthOptions.GenerateToken(
+                    user.Id,
                     user.Username,
                     user.Role);
             }

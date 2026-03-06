@@ -8,5 +8,7 @@
         public string Role { get; set; } = string.Empty;
         public DateTime? LastSessionTime { get; set; }
         public bool temporaryPassword { get; set; }
+
+        public virtual ICollection<UserElectricalStation> UserElectricalStations { get; set; }
     }
 }

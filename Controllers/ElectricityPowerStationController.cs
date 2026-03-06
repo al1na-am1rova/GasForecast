@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
+using System.Security.Claims;
 
 namespace GasForecast.Controllers
 {
@@ -27,41 +28,84 @@ namespace GasForecast.Controllers
         {
             try
             {
-                var stations = await _context.ElectricalPowerStations
+                // ИСПРАВЛЕНО: ищем claim "id" (который мы добавили)
+                var userIdClaim = User.FindFirst("id")?.Value;
+
+                // Для отладки - посмотрим все claims
+                Console.WriteLine("All claims:");
+                foreach (var claim in User.Claims)
+                {
+                    Console.WriteLine($"- {claim.Type}: {claim.Value}");
+                }
+
+                if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int currentUserId))
+                {
+                    return Unauthorized("Не удалось определить пользователя");
+                }
+
+                // ПОЛУЧАЕМ РОЛЬ ПОЛЬЗОВАТЕЛЯ ИЗ JWT
+                var roleClaim = User.FindFirst(ClaimTypes.Role)?.Value;
+                bool isAdmin = roleClaim?.Equals("admin", StringComparison.OrdinalIgnoreCase) == true;
+
+                // ЕСЛИ АДМИН - ПОКАЗЫВАЕМ ВСЕ СТАНЦИИ
+                if (isAdmin)
+                {
+                    var allStations = await _context.ElectricalPowerStations
+                        .OrderBy(s => s.Id)
+                        .ToListAsync();
+
+                    return Ok(allStations); // Даже если пусто, возвращаем пустой массив
+                }
+
+                // ЕСЛИ ОБЫЧНЫЙ ПОЛЬЗОВАТЕЛЬ - ПОКАЗЫВАЕМ ТОЛЬКО ЕГО СТАНЦИИ
+                var userStations = await _context.UserElectricalStations
+                    .Where(ues => ues.UserId == currentUserId)
+                    .Include(ues => ues.ElectricalPowerStation)
+                    .Select(ues => ues.ElectricalPowerStation)
+                    .Where(s => s != null)
                     .OrderBy(s => s.Id)
                     .ToListAsync();
 
-                if (!stations.Any())
-                {
-                    return NotFound("ЭСН не найдены");
-                }
-
-                return Ok(stations);
+                // ВСЕГДА ВОЗВРАЩАЕМ МАССИВ, ДАЖЕ ЕСЛИ ОН ПУСТОЙ
+                return Ok(userStations);
             }
             catch (Exception ex)
             {
                 return StatusCode(500, $"Ошибка при получении списка ЭСН: {ex.Message}");
             }
         }
-
         [HttpPost("add")]
-        [Authorize(Roles = "admin")]
-        public async Task<ActionResult<ElectricalPowerStation>> CreateStation([FromBody] ElectricalPowerStationCreateDTO request)
+        public async Task<ActionResult<ElectricalPowerStationCreateDTO>> CreateStation([FromBody] ElectricalPowerStationCreateDTO request)
         {
             try
             {
+                // Проверка модели
                 if (!ModelState.IsValid)
                 {
                     return BadRequest(ModelState);
                 }
 
-                // Проверяем, существует ли уже станция с таким названием
-                var existingStation = await _context.ElectricalPowerStations
-                    .FirstOrDefaultAsync(s => s.Name == request.Name);
-
-                if (existingStation != null)
+                // Получаем ID текущего пользователя
+                var userIdClaim = User.FindFirst("id")?.Value;
+                if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int currentUserId))
                 {
-                    return Conflict($"ЭСН с названием '{request.Name}' уже существует");
+                    return Unauthorized("Не удалось определить пользователя");
+                }
+
+                // ПРОВЕРЯЕМ, ЕСТЬ ЛИ У ЭТОГО ПОЛЬЗОВАТЕЛЯ СТАНЦИЯ С ТАКИМ НАЗВАНИЕМ
+                var existingStation = await _context.UserElectricalStations
+                    .Where(ues => ues.UserId == currentUserId)
+                    .Include(ues => ues.ElectricalPowerStation)
+                    .Select(ues => ues.ElectricalPowerStation)
+                    .AnyAsync(s => s.Name == request.Name);
+
+                if (existingStation)
+                {
+                    return Conflict(new
+                    {
+                        message = $"У вас уже есть ЭСН с названием '{request.Name}'",
+                        errorCode = "DUPLICATE_STATION_NAME"
+                    });
                 }
 
                 // Создаем новую станцию
@@ -71,18 +115,32 @@ namespace GasForecast.Controllers
                     UnitType = request.UnitType,
                     ActiveUnitsCount = request.ActiveUnitsCount,
                     LaunchDate = request.LaunchDate
-
                 };
 
-                // Добавляем в базу данных
                 _context.ElectricalPowerStations.Add(station);
                 await _context.SaveChangesAsync();
 
-                // Возвращаем созданную станцию с ID
-                return CreatedAtAction(
-                    nameof(GetStationById),
-                    new { id = station.Id },
-                    station);
+                // СОЗДАЕМ ЗАПИСЬ В ТАБЛИЦЕ СВЯЗИ
+                var userStation = new UserElectricalStation
+                {
+                    UserId = currentUserId,
+                    ElectricalStationId = station.Id
+                };
+                _context.UserElectricalStations.Add(userStation);
+                await _context.SaveChangesAsync();
+
+                // Возвращаем успех
+                return StatusCode(201, new
+                {
+                    message = "ЭСН успешно создана",
+                    station = new
+                    {
+                        request.Name,
+                        request.UnitType,
+                        request.ActiveUnitsCount,
+                        request.LaunchDate
+                    }
+                });
             }
             catch (Exception ex)
             {
@@ -113,7 +171,7 @@ namespace GasForecast.Controllers
         }
 
         [HttpDelete("delete/{id}")]
-        [Authorize(Roles = "admin")]
+        [Authorize]
         public async Task<ActionResult> DeleteStation(int id)
         {
             using var transaction = await _context.Database.BeginTransactionAsync();
@@ -148,8 +206,7 @@ namespace GasForecast.Controllers
         }
 
         [HttpPut("update/{id}")]
-        [Authorize(Roles = "admin")]
-
+        [Authorize]
         public async Task<ActionResult<ElectricalPowerStation>> UpdateStation(int id, [FromBody] ElectricalPowerStationUpdateDTO request)
         {
             try

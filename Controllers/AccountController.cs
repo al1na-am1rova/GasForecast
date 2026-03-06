@@ -1,4 +1,5 @@
 ﻿using Azure.Core;
+using GasForecast.Auth;
 using GasForecast.Data;
 using GasForecast.Models;
 using GasForecast.Models.DTO;
@@ -28,19 +29,32 @@ public class AccountController : ControllerBase
     [AllowAnonymous] // Явно разрешаем доступ без аутентификации
     public async Task<IActionResult> GetToken([FromBody] LoginData ld, CancellationToken ct)
     {
-
         try
         {
             var token = await _svc.GetTokenAsync(ld, ct);
             if (token is null)
                 return Unauthorized(new { message = "Неправильный логин или пароль" });
 
+            // Получаем пользователя из базы данных
             var user = _context.Users.FirstOrDefault(u => u.Username == ld.Username);
-            user.LastSessionTime = DateTime.Now;
+            if (user == null)
+            {
+                return Unauthorized(new { message = "Пользователь не найден" });
+            }
 
+            // Обновляем время последней сессии
+            user.LastSessionTime = DateTime.Now;
             _context.Users.Update(user);
-            _context.SaveChanges();
-            return Ok(token);
+            await _context.SaveChangesAsync(ct);
+
+            // Генерируем новый токен с ID пользователя
+            var tokenResponse = AuthOptions.GenerateToken(
+                userId: user.Id,           // Добавляем ID пользователя
+                login: user.Username,
+                role: user.Role
+            );
+
+            return Ok(tokenResponse);
         }
         catch (Exception ex)
         {

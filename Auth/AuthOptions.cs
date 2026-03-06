@@ -21,11 +21,12 @@ namespace GasForecast.Auth
         // Создаем модель для ответа
         public record TokenResponse(string AccessToken, string Username, string Role, DateTime Expires);
 
-        public static TokenResponse GenerateToken(string login, string role)
+        // ИЗМЕНЕНО: добавляем userId
+        public static TokenResponse GenerateToken(int userId, string login, string role)
         {
-
             var claims = new List<Claim>
             {
+                new Claim("id", userId.ToString()),           // ДОБАВЛЯЕМ ID пользователя
                 new Claim(ClaimTypes.Name, login),
                 new Claim(ClaimTypes.Role, role)
             };
