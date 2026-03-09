@@ -22,6 +22,7 @@ namespace GasForecast.Data
         public DbSet<ElectricalUnitPassport> ElectricalUnitPassports { get; set; }
         public DbSet<User> Users{ get; set; }
         public DbSet<UserElectricalStation> UserElectricalStations { get; set; }
+        public DbSet<DailyGasConsumption> DailyGasConsumptions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -76,6 +77,29 @@ namespace GasForecast.Data
 
                 // Добавляем уникальный индекс, чтобы у пользователя не было дублей одной станции
                 entity.HasIndex(e => new { e.UserId, e.ElectricalStationId })
+                    .IsUnique();
+            });
+
+            modelBuilder.Entity<DailyGasConsumption>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.Date)
+                    .IsRequired()
+                    .HasColumnType("timestamp without time zone");
+
+                entity.Property(e => e.Consumption)
+                    .IsRequired()
+                    .HasPrecision(18, 2);
+
+                // Связь с ElectricalPowerStation
+                entity.HasOne(e => e.ElectricalPowerStation)
+                    .WithMany(eps => eps.DailyGasConsumptions)
+                    .HasForeignKey(e => e.ElectricalStationId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                // Уникальный индекс - одна запись на станцию в день
+                entity.HasIndex(e => new { e.ElectricalStationId, e.Date })
                     .IsUnique();
             });
         }

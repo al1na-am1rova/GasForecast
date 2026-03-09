@@ -11,6 +11,7 @@ namespace GasForecast.Models
         public DateTime LaunchDate { get; set; } // дата запуска
 
         public virtual ICollection<UserElectricalStation> UserElectricalStations { get; set; }
+        public virtual ICollection<DailyGasConsumption> DailyGasConsumptions { get; set; }
     }
 
     public class LaunchDateNotFutureAttribute : ValidationAttribute

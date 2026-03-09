@@ -28,15 +28,8 @@ namespace GasForecast.Controllers
         {
             try
             {
-                // ИСПРАВЛЕНО: ищем claim "id" (который мы добавили)
-                var userIdClaim = User.FindFirst("id")?.Value;
 
-                // Для отладки - посмотрим все claims
-                Console.WriteLine("All claims:");
-                foreach (var claim in User.Claims)
-                {
-                    Console.WriteLine($"- {claim.Type}: {claim.Value}");
-                }
+                var userIdClaim = User.FindFirst("id")?.Value;
 
                 if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int currentUserId))
                 {
