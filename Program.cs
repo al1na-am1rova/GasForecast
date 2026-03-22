@@ -6,6 +6,9 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
+using GasForecast.Services.ML;
+
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -22,6 +25,17 @@ builder.Services.AddScoped<IAccountService, AccountService>();
 // Регистрируем DbContext для PostgreSQL
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddHttpClient<IMLServiceClient, MLServiceClient>(client =>
+{
+    var mlUrl = builder.Configuration["MLService:Url"] ?? "http://localhost:8000";
+    client.BaseAddress = new Uri(mlUrl);
+    client.Timeout = TimeSpan.FromSeconds(30);
+});
+
+builder.Services.AddScoped<IModelManagementService, ModelManagementService>();
+
+builder.Services.AddHostedService<ModelTrainingBackgroundService>();
 
 builder.Services.AddCors(options =>
 {
