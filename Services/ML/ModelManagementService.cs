@@ -2,6 +2,7 @@
 using GasForecast.Controllers;
 using GasForecast.Data;
 using Microsoft.EntityFrameworkCore;
+using GasForecast.Services.ML;
 
 namespace GasForecast.Services.ML
 {
@@ -14,6 +15,9 @@ namespace GasForecast.Services.ML
         Task<MonthlyPredictionResultDto> PredictMonthlyAsync(int stationId, string month);
         Task<List<MonthlyForecastDto>> GetMonthlyForecastAsync(int stationId, int monthsCount);
         Task<TrainingStatusDto> GetTrainingStatusAsync(int stationId);
+        Task<AnomalyCheckResponse> CheckDataForAnomaliesAsync(int stationId, List<DailyDataPoint> data);
+        Task<TrainWithCheckResponse> TrainModelWithCheckAsync(TrainWithCheckRequest request);
+        Task<List<DailyDataPoint>> GetStationDailyDataAsync(int stationId, DateTime? startDate = null, DateTime? endDate = null);
     }
 
     public class ModelManagementService : IModelManagementService
@@ -256,5 +260,149 @@ namespace GasForecast.Services.ML
                 _logger.LogWarning("Failed to save prediction history: {Error}", ex.Message);
             }
         }
+
+        public async Task<AnomalyCheckResponse> CheckDataForAnomaliesAsync(int stationId, List<DailyDataPoint> data)
+        {
+            try
+            {
+                // Если нет данных для проверки
+                if (data == null || !data.Any())
+                {
+                    return new AnomalyCheckResponse
+                    {
+                        StationId = stationId,
+                        HasAnomalies = false,
+                        TotalChecked = 0,
+                        Recommendation = "Нет данных для проверки",
+                        CanProceed = true,
+                        NeedsConfirmation = false
+                    };
+                }
+
+                // Проверяем, достаточно ли исторических данных
+                var historicalCount = await _context.DailyGasConsumptions
+                    .CountAsync(d => d.ElectricalStationId == stationId);
+
+                if (historicalCount < 30)
+                {
+                    return new AnomalyCheckResponse
+                    {
+                        StationId = stationId,
+                        HasAnomalies = false,
+                        TotalChecked = data.Count,
+                        Recommendation = $"Недостаточно исторических данных ({historicalCount} точек). " +
+                                       "Рекомендуется накопить минимум 30 дней данных.",
+                        CanProceed = true,
+                        NeedsConfirmation = false
+                    };
+                }
+
+                // Отправляем запрос в ML сервис
+                return await _mlClient.CheckDataForAnomaliesAsync(stationId, data);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error checking anomalies for station {StationId}", stationId);
+
+                // При ошибке — разрешаем обучение, но с предупреждением
+                return new AnomalyCheckResponse
+                {
+                    StationId = stationId,
+                    HasAnomalies = false,
+                    HasWarnings = true,
+                    TotalChecked = data?.Count ?? 0,
+                    Recommendation = $"Ошибка проверки аномалий: {ex.Message}. Обучение будет продолжено.",
+                    CanProceed = true,
+                    NeedsConfirmation = false
+                };
+            }
+        }
+
+        /// <summary>
+        /// Обучение модели с проверкой аномалий
+        /// </summary>
+        public async Task<TrainWithCheckResponse> TrainModelWithCheckAsync(TrainWithCheckRequest request)
+        {
+            try
+            {
+                _logger.LogInformation("Training with check for station {StationId}, confirmAnomalies={ConfirmAnomalies}",
+                    request.StationId, request.ConfirmAnomalies);
+
+                // 1. Проверяем аномалии, если не указано принудительное обучение
+                if (!request.ForceRetrain && !request.ConfirmAnomalies)
+                {
+                    var anomalyCheck = await CheckDataForAnomaliesAsync(request.StationId, request.Data);
+
+                    if (anomalyCheck.HasAnomalies)
+                    {
+                        return new TrainWithCheckResponse
+                        {
+                            StationId = request.StationId,
+                            Status = "requires_confirmation",
+                            Message = "Обнаружены аномалии в данных. Требуется подтверждение.",
+                            RequiresConfirmation = true,
+                            AnomalyReport = anomalyCheck
+                        };
+                    }
+                }
+
+                // 2. Запускаем обучение
+                var result = await _mlClient.TrainModelAsync(request.StationId, request.ForceRetrain);
+
+                return new TrainWithCheckResponse
+                {
+                    StationId = request.StationId,
+                    Status = "started",
+                    Message = result.Message ?? "Обучение запущено в фоновом режиме",
+                    RequiresConfirmation = false
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in TrainModelWithCheck for station {StationId}", request.StationId);
+                return new TrainWithCheckResponse
+                {
+                    StationId = request.StationId,
+                    Status = "error",
+                    Message = ex.Message,
+                    RequiresConfirmation = false
+                };
+            }
+        }
+
+        /// <summary>
+        /// Получение ежедневных данных станции
+        /// </summary>
+        public async Task<List<DailyDataPoint>> GetStationDailyDataAsync(int stationId, DateTime? startDate = null, DateTime? endDate = null)
+        {
+            try
+            {
+                var query = _context.DailyGasConsumptions
+                    .Where(d => d.ElectricalStationId == stationId);
+
+                if (startDate.HasValue)
+                    query = query.Where(d => d.Date >= startDate.Value);
+
+                if (endDate.HasValue)
+                    query = query.Where(d => d.Date <= endDate.Value);
+
+                var data = await query
+                    .OrderBy(d => d.Date)
+                    .Select(d => new DailyDataPoint
+                    {
+                        Date = d.Date.ToString("yyyy-MM-dd"),
+                        Consumption = (double)d.Consumption
+                    })
+                    .ToListAsync();
+
+                return data;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting daily data for station {StationId}", stationId);
+                return new List<DailyDataPoint>();
+            }
+        }
+
     }
 }

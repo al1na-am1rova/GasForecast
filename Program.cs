@@ -30,7 +30,7 @@ builder.Services.AddHttpClient<IMLServiceClient, MLServiceClient>(client =>
 {
     var mlUrl = builder.Configuration["MLService:Url"] ?? "http://localhost:8000";
     client.BaseAddress = new Uri(mlUrl);
-    client.Timeout = TimeSpan.FromSeconds(30);
+    client.Timeout = TimeSpan.FromMinutes(5);
 });
 
 builder.Services.AddScoped<IModelManagementService, ModelManagementService>();

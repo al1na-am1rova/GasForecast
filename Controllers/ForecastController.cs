@@ -38,8 +38,6 @@ namespace GasForecast.Controllers
                 .AnyAsync(ues => ues.UserId == userId && ues.ElectricalStationId == stationId);
         }
 
-        // ==================== СУЩЕСТВУЮЩИЕ МЕТОДЫ ====================
-
         [HttpPost("predict/{stationId}")]
         public async Task<IActionResult> PredictGasConsumption(
             int stationId,
@@ -93,11 +91,6 @@ namespace GasForecast.Controllers
             return Ok(new { status = "ok" });
         }
 
-        // ==================== НОВЫЕ МЕТОДЫ ====================
-
-        /// <summary>
-        /// Получить комбинированные данные (история + прогноз)
-        /// </summary>
         [HttpGet("{stationId}/combined")]
         public async Task<IActionResult> GetCombinedData(int stationId, [FromQuery] int forecastMonths = 3)
         {
@@ -210,9 +203,6 @@ namespace GasForecast.Controllers
             }
         }
 
-        /// <summary>
-        /// Сделать прогноз на месяц
-        /// </summary>
         [HttpPost("predict-month")]
         public async Task<IActionResult> PredictMonth([FromBody] MonthlyPredictionRequestDto request)
         {
@@ -233,70 +223,188 @@ namespace GasForecast.Controllers
             }
         }
 
-        /// <summary>
-        /// Получить статус обучения модели
-        /// </summary>
         [HttpGet("training/{stationId}/status")]
         public async Task<IActionResult> GetTrainingStatus(int stationId)
         {
             var status = await _modelManagement.GetTrainingStatusAsync(stationId);
             return Ok(status);
         }
+
+        [HttpPost("check-data")]
+        public async Task<IActionResult> CheckDataForAnomalies([FromBody] CheckDataRequest request)
+        {
+            try
+            {
+                _logger.LogInformation("Check data for anomalies: stationId={StationId}, dataCount={Count}",
+                    request.StationId, request.Data?.Count ?? 0);
+
+                // Проверяем доступ к станции
+                var userId = int.Parse(User.FindFirst("id")?.Value ?? "0");
+                if (!await HasAccessToStation(request.StationId, userId))
+                    return Forbid();
+
+                if (request.Data == null || !request.Data.Any())
+                {
+                    return BadRequest(new { message = "No data provided for checking" });
+                }
+
+                // Преобразуем в DTO
+                var dailyData = request.Data.Select(d => new DailyDataPoint
+                {
+                    Date = d.Date.ToString("yyyy-MM-dd"),
+                    Consumption = d.Consumption
+                }).ToList();
+
+                var result = await _modelManagement.CheckDataForAnomaliesAsync(request.StationId, dailyData);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error checking data for anomalies");
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        [HttpPost("train-with-check")]
+        public async Task<IActionResult> TrainModelWithCheck([FromBody] TrainWithCheckWebRequest request)
+        {
+            try
+            {
+                _logger.LogInformation("Train with check: stationId={StationId}, forceRetrain={ForceRetrain}, confirmAnomalies={ConfirmAnomalies}",
+                    request.StationId, request.ForceRetrain, request.ConfirmAnomalies);
+
+                // Проверяем доступ к станции
+                var userId = int.Parse(User.FindFirst("id")?.Value ?? "0");
+                if (!await HasAccessToStation(request.StationId, userId))
+                    return Forbid();
+
+                // Преобразуем в DTO для сервиса
+                var trainRequest = new TrainWithCheckRequest
+                {
+                    StationId = request.StationId,
+                    Data = request.Data?.Select(d => new DailyDataPoint
+                    {
+                        Date = d.Date.ToString("yyyy-MM-dd"),
+                        Consumption = d.Consumption
+                    }).ToList() ?? new List<DailyDataPoint>(),
+                    ForceRetrain = request.ForceRetrain,
+                    ConfirmAnomalies = request.ConfirmAnomalies
+                };
+
+                var result = await _modelManagement.TrainModelWithCheckAsync(trainRequest);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in train with check");
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+
+        [HttpGet("data/{stationId}/daily")]
+        public async Task<IActionResult> GetDailyData(int stationId, [FromQuery] int daysBack = 60)
+        {
+            try
+            {
+                var userId = int.Parse(User.FindFirst("id")?.Value ?? "0");
+                if (!await HasAccessToStation(stationId, userId))
+                    return Forbid();
+
+                var startDate = DateTime.UtcNow.AddDays(-daysBack);
+
+                var data = await _context.DailyGasConsumptions
+                    .Where(d => d.ElectricalStationId == stationId && d.Date >= startDate)
+                    .OrderBy(d => d.Date)
+                    .Select(d => new
+                    {
+                        date = d.Date.ToString("yyyy-MM-dd"),
+                        consumption = (double)d.Consumption
+                    })
+                    .ToListAsync();
+
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting daily data");
+                return StatusCode(500, new { message = ex.Message });
+            }
+        }
+
+        // ==================== DTO КЛАССЫ ====================
+
+        public class ForecastRequest
+        {
+            public DateTime Date { get; set; }
+            public float? Temperature { get; set; }
+            public float? ElectricityLoad { get; set; }
+        }
+
+        public class MonthlyPredictionRequestDto
+        {
+            public int StationId { get; set; }
+            public string Month { get; set; } // YYYY-MM
+        }
+
+        public class MonthlyForecastDto
+        {
+            public string Month { get; set; }
+            public double Predicted { get; set; }
+        }
+
+        public class CombinedDataDto
+        {
+            public List<MonthlyForecastDto> Historical { get; set; }
+            public List<MonthlyForecastDto> Forecast { get; set; }
+            public ModelInfoDto ModelInfo { get; set; }
+        }
+
+        public class ModelInfoDto
+        {
+            public int StationId { get; set; }
+            public bool Exists { get; set; }
+            public string Version { get; set; }
+            public DateTime? LastTrained { get; set; }
+            public int DataPoints { get; set; }
+            public double? AccuracyMape { get; set; }
+        }
+
+        public class MonthlyPredictionResultDto
+        {
+            public int StationId { get; set; }
+            public string Month { get; set; }
+            public double PredictedConsumption { get; set; }
+            public double Confidence { get; set; }
+            public string ModelVersion { get; set; }
+            public string Status { get; set; }
+            public string Message { get; set; }
+        }
+
+        public class CheckDataRequest
+        {
+            public int StationId { get; set; }
+            public List<DailyDataWebPoint> Data { get; set; }
+        }
+
+        public class DailyDataWebPoint
+        {
+            public DateTime Date { get; set; }
+            public double Consumption { get; set; }
+        }
+
+        public class TrainWithCheckWebRequest
+        {
+            public int StationId { get; set; }
+            public List<DailyDataWebPoint> Data { get; set; }
+            public bool ForceRetrain { get; set; }
+            public bool ConfirmAnomalies { get; set; }
+        }
     }
-
-    // ==================== DTO КЛАССЫ ====================
-
-    public class ForecastRequest
-    {
-        public DateTime Date { get; set; }
-        public float? Temperature { get; set; }
-        public float? ElectricityLoad { get; set; }
-    }
-
-    public class MonthlyPredictionRequestDto
-    {
-        public int StationId { get; set; }
-        public string Month { get; set; } // YYYY-MM
-    }
-
-    public class MonthlyForecastDto
-    {
-        public string Month { get; set; }
-        public double Predicted { get; set; }
-    }
-
-    public class CombinedDataDto
-    {
-        public List<MonthlyForecastDto> Historical { get; set; }
-        public List<MonthlyForecastDto> Forecast { get; set; }
-        public ModelInfoDto ModelInfo { get; set; }
-    }
-
-    public class ModelInfoDto
-    {
-        public int StationId { get; set; }
-        public bool Exists { get; set; }
-        public string Version { get; set; }
-        public DateTime? LastTrained { get; set; }
-        public int DataPoints { get; set; }
-        public double? AccuracyMape { get; set; }
-    }
-
-    public class MonthlyPredictionResultDto
-    {
-        public int StationId { get; set; }
-        public string Month { get; set; }
-        public double PredictedConsumption { get; set; }
-        public double Confidence { get; set; }
-        public string ModelVersion { get; set; }
-        public string Status { get; set; }
-        public string Message { get; set; }
-    }
-
     public class TrainingStatusDto
     {
         public int StationId { get; set; }
-        public string Status { get; set; } // pending, training, completed, failed
+        public string Status { get; set; }
         public string Message { get; set; }
         public int? Progress { get; set; }
         public string ModelVersion { get; set; }
